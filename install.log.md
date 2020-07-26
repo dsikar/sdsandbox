@@ -33,5 +33,32 @@ print(tf.__version__)
 ```
 All being well we should be able to train models.
 
+## Camber
 
+1. Cloned repository
+2. Ran each line in requirements separately
+```
+python3 -m pip install --user numpy
+python3 -m pip install --user pillow
+python3 -m pip install --user h5py
+python3 -m pip install --user gym
+python3 -m pip install --user -e git+https://github.com/tawnkramer/gym-donkeycar.git#egg=gym_donkeycar
 
+```
+Ran into error
+```
+ImportError: No module named 'gym_donkeycar'
+```
+Two ways to fix this, from src directory, run
+```
+python3 -m pip install --user -e git+https://github.com/tawnkramer/gym-donkeycar.git#egg=gym_donkeycar
+```
+Alternatively, add ~/git/sdsandbox to $PYTHONPATH - details to be added - in .bashrc.  
+We still get error on camber
+```
+  File "/home/enterprise.internal.city.ac.uk/aczd097/git/sdsandbox/src/src/gym-donkeycar/gym_donkeycar/envs/donkey_sim.py", line 161
+    logger.warning(f'unknown message type {msg_type}')
+                                                    ^
+SyntaxError: invalid syntax
+
+```

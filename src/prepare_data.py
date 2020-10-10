@@ -9,7 +9,7 @@ import os
 import time
 import glob
 import shutil
-
+import helper_functions
 
 def prepare(src_path, dest_path):
 
@@ -19,7 +19,6 @@ def prepare(src_path, dest_path):
     t = time.ctime(os.path.getmtime(src_basename))
     t = t.replace(' ', '_')
     t = t.replace(':', '_')
-
 
     #we save the steering, and other single channel data to log, images to camera
     basepath_log = os.path.join(dest_path, "log")

@@ -19,6 +19,7 @@ from tensorflow import keras
 
 import conf
 import models
+import helper_functions
 
 '''
 matplotlib can be a pain to setup. So handle the case where it is absent. When present,
@@ -78,12 +79,17 @@ def generator(samples, batch_size=64,):
             controls = []
             for fullpath in batch_samples:
                 try:
-                
-                    frame_number = os.path.basename(fullpath).split("_")[0]
-                    json_filename = os.path.join(os.path.dirname(fullpath), "record_" + frame_number + ".json")
-                    data = load_json(json_filename)
-                    steering = float(data["user/angle"])
-                    throttle = float(data["user/throttle"])
+                    if(conf.datasource=='udacity'):
+                        img_name = os.path.basename(fullpath).split("/")[0]
+                        img_id = img_name.split('.')[0]
+                        # get the image name and find steering angle
+                        steering = helper_functions.mydict.get(img_id)
+                    else:
+                        frame_number = os.path.basename(fullpath).split("_")[0]
+                        json_filename = os.path.join(os.path.dirname(fullpath), "record_" + frame_number + ".json")
+                        data = load_json(json_filename)
+                        steering = float(data["user/angle"])
+                        throttle = float(data["user/throttle"])
                 
                     try:
                         image = Image.open(fullpath)
@@ -92,6 +98,12 @@ def generator(samples, batch_size=64,):
                         continue
 
                     #PIL Image as a numpy array
+                    # Notes:
+                    # 1. Any image augmentation should be happening here
+                    # 2. Assumed unity image size is 160 x 120 pixels - defined in conf.py
+                    # 3. Udacity image size for Ch2_001.tar.gz image files is 640 x 480
+                    if(conf.datasource=='udacity'):
+                        image = image.resize(conf.image_width, conf.image_height)
                     image = np.array(image, dtype=np.float32)
 
                     images.append(image)
@@ -173,7 +185,7 @@ def make_generators(inputs, limit=None, batch_size=64):
     return train_generator, validation_generator, n_train, n_val
 
 
-def go(model_name, epochs=50, inputs='./log/*.jpg', limit=None):
+def go(model_name, epochs=50, inputs='../dataset/udacity/Ch2_001/center/*.jpg', limit=None):
 
     print('working on model', model_name)
 
@@ -232,7 +244,8 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='train script')
     parser.add_argument('--model', type=str, help='model name')
     parser.add_argument('--epochs', type=int, default=conf.training_default_epochs, help='number of epochs')
-    parser.add_argument('--inputs', default='../dataset/log/*.jpg', help='input mask to gather images')
+    # parser.add_argument('--inputs', default='../dataset/log/*.jpg', help='input mask to gather images')
+    parser.add_argument('--inputs', default='../dataset/udacity/Ch2_001/center/*.jpg', help='input mask to gather images')
     parser.add_argument('--limit', type=int, default=None, help='max number of images to train with')
     args = parser.parse_args()
     

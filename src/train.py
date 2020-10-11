@@ -103,7 +103,7 @@ def generator(samples, batch_size=64,):
                     # 2. Assumed unity image size is 160 x 120 pixels - defined in conf.py
                     # 3. Udacity image size for Ch2_001.tar.gz image files is 640 x 480
                     if(conf.datasource=='udacity'):
-                        image = image.resize(conf.image_width, conf.image_height)
+                        image = image.resize((conf.image_width, conf.image_height))
                     image = np.array(image, dtype=np.float32)
 
                     images.append(image)

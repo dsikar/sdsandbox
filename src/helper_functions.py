@@ -36,7 +36,13 @@ def predict_sa(model_path, image_path):
     # model.compile("sgd", "mse")
     image = Image.open(image_path)
     image = np.array(image, dtype=np.float32)
-    return model.predict(image)
+    # Conform to training shape (dim=4)
+    images = []
+    images.append(image)
+    pred_img = np.array(images)
+    # print(pred_img.shape) # (1, 120, 160, 3)
+    # print(type(pred_img)) # <class 'numpy.ndarray'>
+    return model.predict(pred_img)
 
 
 
@@ -77,6 +83,23 @@ def getdict(filepath):
 #mydict = getdict(filepath)
 
 if __name__ == "__main__":
-    mypred = predict_sa('../outputs/intel_model_qsub_v2.h5',
-                        '../dataset/log/logs_Fri_Jul_10_09_16_18_2020/10000_cam-image_array_.jpg')
-    print(mypred.shape())
+    mypred = predict_sa('../outputs/intel_model_qsub_v2.h5', '../dataset/log/logs_Fri_Jul_10_09_16_18_2020/10400_cam-image_array_.jpg')
+    print(mypred[0][0])
+
+    """
+    Notes on random single tests 
+    predict_sa('../outputs/intel_model_qsub_v2.h5', '../dataset/log/logs_Fri_Jul_10_09_16_18_2020/10000_cam-image_array_.jpg')
+    0.105303116
+    cat ../dataset/log/logs_Fri_Jul_10_09_16_18_2020/record_10000.json  
+    "user/angle":0.09035701304674149,
+
+    predict_sa('../outputs/intel_model_qsub_v2.h5', '../dataset/log/logs_Fri_Jul_10_09_16_18_2020/10100_cam-image_array_.jpg')
+    -0.12858404
+    cat ../dataset/log/logs_Fri_Jul_10_09_16_18_2020/record_10100.json
+    "user/angle":-0.13314887881278993
+
+    predict_sa('../outputs/intel_model_qsub_v2.h5', '../dataset/log/logs_Fri_Jul_10_09_16_18_2020/10400_cam-image_array_.jpg')
+    0.081949875
+    cat ../dataset/log/logs_Fri_Jul_10_09_16_18_2020/record_10400.json
+    "user/angle":0.07557757198810578, 
+    """

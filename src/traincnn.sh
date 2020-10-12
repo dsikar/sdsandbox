@@ -14,4 +14,4 @@
 
 module load cuda/10.0
 
-python train.py
+python3 train.py --model=../outputs/udacity1_nvidia_camber.h5

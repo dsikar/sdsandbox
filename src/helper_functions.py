@@ -16,8 +16,8 @@ import tensorflow as tf
 from tensorflow.python import keras
 from tensorflow.python.keras.models import load_model
 from PIL import Image
-from PIL import Image
 import numpy as np
+import conf
 
 def predict_sa(model_path, image_path):
     """
@@ -35,6 +35,9 @@ def predict_sa(model_path, image_path):
     # we may need to compile model
     # model.compile("sgd", "mse")
     image = Image.open(image_path)
+    if(conf.datasource=='udacity'):
+        # set to same size used in training
+        image = image.resize((conf.image_width, conf.image_height))
     image = np.array(image, dtype=np.float32)
     # Conform to training shape (dim=4)
     images = []
@@ -83,11 +86,21 @@ filepath = '../dataset/udacity/Ch2_001/final_example.csv'
 mydict = getdict(filepath)
 
 if __name__ == "__main__":
-    mypred = predict_sa('../outputs/intel_model_qsub_v2.h5', '../dataset/log/logs_Fri_Jul_10_09_16_18_2020/10400_cam-image_array_.jpg')
+
+    mypred = predict_sa('../outputs/udacity1_intel_qsub.h5', '../dataset/udacity/Ch2_001/center/1479425441182877835.jpg')
     print(mypred[0][0])
 
     """
     Notes on random single tests 
+    ** Udacity
+    
+
+    predict_sa('../outputs/udacity1_intel_qsub.h5', '../dataset/udacity/Ch2_001/center/1479425441182877835.jpg')
+    -0.020317154 
+    cat ../dataset/udacity/Ch2_001/final_example.csv | grep 1479425441182877835
+    1479425441182877835,-0.373665106110275
+
+    ** Unity
     predict_sa('../outputs/intel_model_qsub_v2.h5', '../dataset/log/logs_Fri_Jul_10_09_16_18_2020/10000_cam-image_array_.jpg')
     0.105303116
     cat ../dataset/log/logs_Fri_Jul_10_09_16_18_2020/record_10000.json  

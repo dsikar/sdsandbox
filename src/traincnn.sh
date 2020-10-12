@@ -1,0 +1,17 @@
+#! /bin/bash
+
+# Bash script to run batch job on Camber server (@city)
+
+#SBATCH --job-name="NVIDIA x Udacity data model"
+#SBATCH --mail-type=ALL
+#SBATCH --mail-user=daniel.sikar@city.ac.uk
+#SBATCH --nodes=1
+#SBATCH --ntasks-per-node=8
+#SBATCH --output job%J.out
+#SBATCH --error job%J.err
+#SBATCH --partition=normal
+#SBATCH --gres=gpu:1
+
+module load cuda/10.0
+
+python train.py

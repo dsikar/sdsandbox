@@ -87,14 +87,22 @@ mydict = getdict(filepath)
 
 if __name__ == "__main__":
 
-    mypred = predict_sa('../outputs/udacity1_intel_qsub.h5', '../dataset/udacity/Ch2_001/center/1479425441182877835.jpg')
+    mypred = predict_sa('../outputs/udacity1_intel_qsub.h5', '../dataset/udacity/Ch2_001/center/1479425472688106000.jpg')
     print(mypred[0][0])
 
     """
     Notes on random single tests 
     ** Udacity
-    
+    predict_sa('../outputs/udacity1_intel_qsub.h5', '../dataset/udacity/Ch2_001/center/1479425472688106000.jpg')
+    0.0012489989
+    cat ../dataset/udacity/Ch2_001/final_example.csv | grep 1479425472688106000
+    1479425472688106000,-0.0922870745882392 
 
+    predict_sa('../outputs/udacity1_intel_qsub.h5', '../dataset/udacity/Ch2_001/center/1479425452434545378.jpg')
+    -0.0057435557
+    cat ../dataset/udacity/Ch2_001/final_example.csv | grep 1479425452434545378
+    1479425452434545378,-0.336740952916443
+    
     predict_sa('../outputs/udacity1_intel_qsub.h5', '../dataset/udacity/Ch2_001/center/1479425441182877835.jpg')
     -0.020317154 
     cat ../dataset/udacity/Ch2_001/final_example.csv | grep 1479425441182877835

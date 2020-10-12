@@ -73,8 +73,8 @@ def getdict(filepath):
     return mydict
 
 # make dict available
-#filepath = '../dataset/udacity/Ch2_001/final_example.csv'
-#mydict = getdict(filepath)
+# filepath = '../dataset/udacity/Ch2_001/final_example.csv'
+# mydict = getdict(filepath)
 
 if __name__ == "__main__":
     mypred = predict_sa('../outputs/intel_model_qsub_v2.h5',

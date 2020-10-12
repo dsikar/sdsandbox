@@ -1,7 +1,13 @@
 #! /bin/bash
 
 # Bash script to run batch job on Camber server (@city)
-
+# To run on camber
+# $ sbatch traincnn.sh
+# To check
+# $ squeue
+# $ sinfo
+# To log into node:
+# ssh <node> # e.g. ssh africa, etc
 #SBATCH --job-name="NVIDIA x Udacity data model"
 #SBATCH --mail-type=ALL
 #SBATCH --mail-user=daniel.sikar@city.ac.uk

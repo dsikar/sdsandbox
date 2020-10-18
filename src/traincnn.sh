@@ -1,5 +1,6 @@
 #! /bin/bash
 
+# Script source: https://moodle.city.ac.uk/pluginfile.php/1651287/mod_forum/attachment/307378/Cluster%20access%20documentation.pdf?forcedownload=1
 # Bash script to run batch job on Camber server (@city)
 # To run on camber
 # $ sbatch traincnn.sh

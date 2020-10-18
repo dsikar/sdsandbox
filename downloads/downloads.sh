@@ -1,14 +1,19 @@
 #! /bin/bash
 
-# Bash script to run batch job on Camber server (@city) - see master branch for full notes
+# Bash script to run batch job on Camber server (@city)
 # To run on camber
 # $ sbatch traincnn.sh
 # To check
-# $ squeue
+# $ watch -n 1 squeue
 # $ sinfo
+# $ tail -f job<jobid>.out
 # To log into node:
-# ssh <node> # e.g. ssh africa, etc
-#SBATCH --job-name="NVIDIA x Udacity data model"
+# $ ssh <node> # e.g. ssh africa, etc
+# To check memory usage on node:
+# $ ps -o pid,user,%mem,command ax | sort -b -k3 -r > procs.txt
+# $ head procs.txt
+
+#SBATCH --job-name="124G Udacity dl"
 #SBATCH --mail-type=ALL
 #SBATCH --mail-user=daniel.sikar@city.ac.uk
 #SBATCH --nodes=1
@@ -19,5 +24,14 @@
 #SBATCH --gres=gpu:1
 
 # module load cuda/10.0
-# download overcast driving data 124G compressed
+
+echo
+echo started download job: $(date "+%y%m%d.%H%M%S.%3N")
+echo
+
+# python3 train.py --model=../outputs/unity5_nvidia_camber.h5
 wget http://bit.ly/udacity-dataset-2-2
+
+echo
+echo finished download job: $(date "+%y%m%d.%H%M%S.%3N")
+echo

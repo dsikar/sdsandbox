@@ -21,4 +21,13 @@
 
 module load cuda/10.0
 
-python3 train.py --model=../outputs/udacity1_nvidia_camber.h5
+echo
+echo started Ud1 job: $(date "+%y%m%d.%H%M%S.%3N")
+echo
+
+python3 train.py --model=../outputs/ud1_nvidia.h5
+
+echo
+echo finished Ud1 job: $(date "+%y%m%d.%H%M%S.%3N")
+echo
+

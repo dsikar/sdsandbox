@@ -216,7 +216,7 @@ def go(model_name, epochs=50, inputs='./log/*.jpg', limit=None):
         verbose=1,
         callbacks=callbacks)
     # save history
-    with open('/U3DHistoryDict', 'wb') as file_pi:
+    with open('U3DHistoryDict', 'wb') as file_pi:
         pickle.dump(history.history, file_pi)    
     try:
         if do_plot:

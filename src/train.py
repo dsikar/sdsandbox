@@ -12,6 +12,7 @@ import fnmatch
 import argparse
 import random
 import json
+import pickle
 
 import numpy as np
 from PIL import Image
@@ -226,6 +227,9 @@ def go(model_name, epochs=50, inputs='../dataset/udacity/Ch2_001/center/*.jpg', 
         epochs=epochs,
         verbose=1,
         callbacks=callbacks)
+    # save history
+    with open('UdacityHistoryDict', 'wb') as file_pi:
+        pickle.dump(history.history, file_pi)
     
     try:
         if do_plot:

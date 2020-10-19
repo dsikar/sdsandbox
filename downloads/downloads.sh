@@ -13,7 +13,7 @@
 # $ ps -o pid,user,%mem,command ax | sort -b -k3 -r > procs.txt
 # $ head procs.txt
 
-#SBATCH --job-name="124G Udacity dl"
+#SBATCH --job-name="Ford batch"
 #SBATCH --mail-type=ALL
 #SBATCH --mail-user=daniel.sikar@city.ac.uk
 #SBATCH --nodes=1
@@ -30,7 +30,7 @@ echo started download job: $(date "+%y%m%d.%H%M%S.%3N")
 echo
 
 # python3 train.py --model=../outputs/unity5_nvidia_camber.h5
-wget http://bit.ly/udacity-dataset-2-2
+wget $1
 
 echo
 echo finished download job: $(date "+%y%m%d.%H%M%S.%3N")

@@ -47,8 +47,6 @@ def predict_sa(model_path, image_path):
     # print(type(pred_img)) # <class 'numpy.ndarray'>
     return model.predict(pred_img)
 
-
-
 def getdict(filepath):
     """
     Create a dictionary from file.
@@ -78,8 +76,16 @@ def getdict(filepath):
     reader = csv.reader(file)
     # skip first line headers
     next(reader, None)
+    # append steering angles
     mydict = {rows[0]: float(rows[1]) for rows in reader}
     return mydict
+
+# TODO - steering angle
+# Get Ford
+
+
+# Get Kitti
+# Get Audi
 
 # make dict available
 filepath = '../dataset/udacity/Ch2_001/final_example.csv'

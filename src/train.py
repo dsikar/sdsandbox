@@ -198,7 +198,7 @@ def go(model_name, epochs=50, inputs='../dataset/udacity/Ch2_001/center/*.jpg', 
     display layer summary and weights info
     '''
     #models.show_model_summary(model)
-
+    # callbarcks, these functions will be called in
     callbacks = [
         keras.callbacks.EarlyStopping(monitor='val_loss', patience=conf.training_patience, verbose=0),
         keras.callbacks.ModelCheckpoint(model_name, monitor='val_loss', save_best_only=True, verbose=0),

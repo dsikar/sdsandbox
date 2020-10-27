@@ -9,5 +9,7 @@ sdsim/Temp
 *.csproj
 sdsim/.vs
 sdsim/Build
-dataset
 sdsim/Assets/Town Creator Kit V2
+# symlinks
+data
+dataset

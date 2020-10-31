@@ -4,22 +4,23 @@ Train your nerual network
 Author: Tawn Kramer
 '''
 from __future__ import print_function
-import os
-import sys
-import glob
-import time
-import fnmatch
-import argparse
-import random
-import json
-import pickle
 
+import argparse
+import fnmatch
+import json
+import os
+import pickle
+import random
+from time import strftime
+from datetime import datetime
 import numpy as np
 from PIL import Image
 from tensorflow import keras
+
 # conf.py, models.py
 import conf
 import models
+from helper_functions import hf_mkdir
 
 '''
 matplotlib can be a pain to setup. So handle the case where it is absent. When present,
@@ -174,19 +175,23 @@ def make_generators(inputs, limit=None, batch_size=64):
     return train_generator, validation_generator, n_train, n_val
 
 
-def go(model_name, epochs=50, inputs='./log/*.jpg', limit=None):
+def go(model_name, outdir, epochs=50, inputs='./log/*.jpg', limit=None):
 
     print('working on model', model_name)
+
+    hf_mkdir(outdir)
+    outdir += '/' + model_name
+    hf_mkdir(outdir)
+
+    # https://docs.python.org/3/library/datetime.html#strftime-strptime-behavior
+    dt = strftime("%Y%m%d%H%M%S")
+    fp = outdir + '/' + dt + '_' + model_name;
+    model_name = fp + '.h5'
 
     '''
     modify config.json to select the model to train.
     '''
     model = models.get_nvidia_model(conf.num_outputs)
-
-    '''
-    display layer summary and weights info
-    '''
-    #models.show_model_summary(model)
 
     callbacks = [
         keras.callbacks.EarlyStopping(monitor='val_loss', patience=conf.training_patience, verbose=0),
@@ -207,7 +212,7 @@ def go(model_name, epochs=50, inputs='./log/*.jpg', limit=None):
     validation_steps = n_val // batch_size
 
     print("steps_per_epoch", steps_per_epoch, "validation_steps", validation_steps)
-
+    s1 = strftime("%Y%m%d%H%M%S")
     history = model.fit_generator(train_generator, 
         steps_per_epoch = steps_per_epoch,
         validation_data = validation_generator,
@@ -215,30 +220,73 @@ def go(model_name, epochs=50, inputs='./log/*.jpg', limit=None):
         epochs=epochs,
         verbose=1,
         callbacks=callbacks)
+    s2 = strftime("%Y%m%d%H%M%S")
+    FMT = "%Y%m%d%H%M%S"
+    tdelta = datetime.strptime(s2, FMT) - datetime.strptime(s1, FMT)
+    tdelta = "Total training time: " + str(tdelta)
+
+    # save info
+    log = fp + '.log'
+    logfile = open(log, 'w')
+    logfile.write("Model name: " + model_name + "\r\n")
+    logfile.write(tdelta)
+    logfile.write('\r\n');
+    logfile.write("Training loss: " + '{0:.3f}'.format(history.history['loss'][-1]) + "\r\n")
+    logfile.write("Validation loss: " + '{0:.3f}'.format(history.history['val_loss'][-1]) + "\r\n")
+    logfile.write("Training accuracy: " + '{0:.3f}'.format(history.history['acc'][-1]) + "\r\n")
+    logfile.write("Validation accuracy: " + '{0:.3f}'.format(history.history['val_acc'][-1]) + "\r\n")
+    logfile.close()
+
+
     # save history
-    with open('U3DHistoryDict', 'wb') as file_pi:
+    histfile = fp + '.history'
+    with open(histfile, 'wb') as file_pi:
         pickle.dump(history.history, file_pi)    
     try:
         if do_plot:
             # summarize history for loss
-            plt.plot(history.history['loss'])
-            plt.plot(history.history['val_loss'])
-            plt.title('model loss')
-            plt.ylabel('loss')
-            plt.xlabel('epoch')
-            plt.legend(['train', 'test'], loc='upper left')
-            plt.savefig('loss.png')
+            # working code
+            #plt.plot(history.history['loss'])
+            #plt.plot(history.history['val_loss'])
+            #plt.title('model loss')
+            #plt.ylabel('loss')
+            #plt.xlabel('epoch')
+
+            #plt.legend(['train', 'test'], loc='upper left')
+            #limg = fp + '_loss.png'
+            #plt.savefig('limg')
+            # summarize history for accuracy
+
+            fig = plt.figure()
+            ax = fig.add_subplot(111)
+            #ax.plot(time, Swdown, '-', label='Swdown')
+            ax.plot(history.history['loss'], '-', label='Training Loss')
+            ax.plot(history.history['val_loss'], '-', label='Validation Loss')
+            ax2 = ax.twinx()
+            ax2.plot(history.history['acc'], '-', label='Training Accuracy')
+            ax2.plot(history.history['val_acc'], '-', label='Validation Accuracy')
+            ax.legend(loc=2) # https://matplotlib.org/3.1.1/api/_as_gen/matplotlib.pyplot.legend.html
+            ax.grid()
+            ax.set_xlabel("Epoch")
+            ax.set_ylabel(r"Loss")
+            ax2.set_ylabel(r"Accurary")
+            ax.set_ylim(0, 0.2)
+            ax2.set_ylim(0.5, 1)
+            ax2.legend(loc=1)
+            aimg = fp + '_accuracy.png'
+            plt.savefig(aimg)
     except:
         print("problems with loss graph")
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='train script')
     parser.add_argument('--model', type=str, help='model name')
+    parser.add_argument('--outdir', type=str, help='output directory')
     parser.add_argument('--epochs', type=int, default=conf.training_default_epochs, help='number of epochs')
-    parser.add_argument('--inputs', default='../dataset/log/*.jpg', help='input mask to gather images')
+    parser.add_argument('--inputs', default='../dataset/unity/log_sample/*.jpg', help='input mask to gather images')
     parser.add_argument('--limit', type=int, default=None, help='max number of images to train with')
     args = parser.parse_args()
     
-    go(args.model, epochs=args.epochs, limit=args.limit, inputs=args.inputs)
+    go(args.model, args.outdir, epochs=args.epochs, limit=args.limit, inputs=args.inputs)
 
 #python train.py ..\outputs\mymodel_aug_90_x4_e200 --epochs=200

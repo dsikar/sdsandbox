@@ -12,11 +12,12 @@ import fnmatch
 import argparse
 import random
 import json
+import pickle
 
 import numpy as np
 from PIL import Image
 from tensorflow import keras
-
+# conf.py, models.py
 import conf
 import models
 
@@ -214,9 +215,9 @@ def go(model_name, epochs=50, inputs='./log/*.jpg', limit=None):
         epochs=epochs,
         verbose=1,
         callbacks=callbacks)
-
-    # 
-    # 
+    # save history
+    with open('U3DHistoryDict', 'wb') as file_pi:
+        pickle.dump(history.history, file_pi)    
     try:
         if do_plot:
             # summarize history for loss

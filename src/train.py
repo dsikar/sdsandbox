@@ -214,7 +214,9 @@ def go(model_name, epochs=50, inputs='./log/*.jpg', limit=None):
         epochs=epochs,
         verbose=1,
         callbacks=callbacks)
-    
+
+    # 
+    # 
     try:
         if do_plot:
             # summarize history for loss

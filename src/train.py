@@ -244,19 +244,6 @@ def go(model_name, outdir, epochs=50, inputs='./log/*.jpg', limit=None):
         pickle.dump(history.history, file_pi)    
     try:
         if do_plot:
-            # summarize history for loss
-            # working code
-            #plt.plot(history.history['loss'])
-            #plt.plot(history.history['val_loss'])
-            #plt.title('model loss')
-            #plt.ylabel('loss')
-            #plt.xlabel('epoch')
-
-            #plt.legend(['train', 'test'], loc='upper left')
-            #limg = fp + '_loss.png'
-            #plt.savefig('limg')
-            # summarize history for accuracy
-
             fig = plt.figure()
             ax = fig.add_subplot(111)
             #ax.plot(time, Swdown, '-', label='Swdown')

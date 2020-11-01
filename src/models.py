@@ -30,9 +30,9 @@ def get_nvidia_model(num_outputs):
     
     img_in = Input(shape=(row, col, ch), name='img_in')
     x = img_in
-    #x = Cropping2D(cropping=((10,0), (0,0)))(x) #trim 10 pixels off top
-    #x = Lambda(lambda x: x/127.5 - 1.)(x) # normalize and re-center
-    x = Lambda(lambda x: x/255.0)(x)
+    x = Cropping2D(cropping=((10,0), (0,0)))(x) #trim 10 pixels off top
+    x = Lambda(lambda x: x/127.5 - 1.)(x) # normalize and re-center
+    # x = Lambda(lambda x: x/255.0)(x)
     x = Conv2D(24, (5,5), strides=(2,2), activation='relu', name="conv2d_1")(x)
     x = Dropout(drop)(x)
     x = Conv2D(32, (5,5), strides=(2,2), activation='relu', name="conv2d_2")(x)

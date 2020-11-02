@@ -190,7 +190,8 @@ def go(model_name, outdir, epochs=50, inputs='./log/*.jpg', limit=None):
     '''
     modify config.json to select the model to train.
     '''
-    model = models.get_nvidia_model_naoki(conf.num_outputs)
+    # model = models.get_nvidia_model_naoki(conf.num_outputs)
+    model = models.get_nvidia_model(conf.num_outputs)
 
     callbacks = [
         # running with naoki's model
@@ -246,6 +247,12 @@ def go(model_name, outdir, epochs=50, inputs='./log/*.jpg', limit=None):
     try:
         if do_plot:
             fig = plt.figure()
+            sp = '(l,vl,a,va)' + '{0:.3f}'.format(history.history['loss'][-1]) \
+                 + ',' + '{0:.3f}'.format(history.history['val_loss'][-1]) \
+                 + ',' + '{0:.3f}'.format(history.history['acc'][-1]) \
+                 + ',' + '{0:.3f}'.format(history.history['val_acc'][-1]) \
+                 + ' - ' + model_name.split('\\')[-1]
+            fig.suptitle(sp, fontsize=8)
             ax = fig.add_subplot(111)
             #ax.plot(time, Swdown, '-', label='Swdown')
             ax.plot(history.history['loss'], '-', label='Training Loss')

@@ -191,7 +191,7 @@ def go(model_name, outdir, epochs=50, inputs='./log/*.jpg', limit=None):
     modify config.json to select the model to train.
     '''
     # model = models.get_nvidia_model_naoki(conf.num_outputs)
-    model = models.get_nvidia_model(conf.num_outputs)
+    model = models.get_nvidia_model1(conf.num_outputs)
 
     callbacks = [
         # running with naoki's model

@@ -10,6 +10,8 @@ from tensorflow.keras.layers import Dense, Lambda, ELU
 from tensorflow.keras.layers import Activation, Dropout, Flatten, Dense
 from tensorflow.keras.layers import Cropping2D
 from tensorflow.keras.optimizers import Adadelta, Adam
+# Alexnet
+
 
 import conf
 
@@ -18,7 +20,7 @@ def show_model_summary(model):
     for layer in model.layers:
         print(layer.output_shape)
 
-def get_nvidia_model(num_outputs):
+def get_nvidia_model1(num_outputs):
     '''
     this model is inspired by the NVIDIA paper
     https://images.nvidia.com/content/tegra/automotive/images/2016/solutions/pdf/end-to-end-dl-using-px.pdf
@@ -60,7 +62,7 @@ def get_nvidia_model(num_outputs):
     return model
 
 
-def get_nvidia_model_naoki(num_outputs):
+def get_nvidia_model2(num_outputs):
     '''
     this model is also inspired by the NVIDIA paper
     https://images.nvidia.com/content/tegra/automotive/images/2016/solutions/pdf/end-to-end-dl-using-px.pdf
@@ -119,3 +121,66 @@ def get_nvidia_model_naoki(num_outputs):
     opt = Adam(lr=0.0001)
     model.compile(optimizer=opt, loss="mse", metrics=['acc'])
     return model
+"""
+def alexnet_model(img_shape=(224, 224, 3), n_classes=10, l2_reg=0.,
+	weights=None):
+
+	# Initialize model
+	alexnet = Sequential()
+
+	# Layer 1
+	alexnet.add(Conv2D(96, (11, 11), input_shape=img_shape,
+		padding='same', kernel_regularizer=l2(l2_reg)))
+	alexnet.add(BatchNormalization())
+	alexnet.add(Activation('relu'))
+	alexnet.add(MaxPooling2D(pool_size=(2, 2)))
+
+	# Layer 2
+	alexnet.add(Conv2D(256, (5, 5), padding='same'))
+	alexnet.add(BatchNormalization())
+	alexnet.add(Activation('relu'))
+	alexnet.add(MaxPooling2D(pool_size=(2, 2)))
+
+	# Layer 3
+	alexnet.add(ZeroPadding2D((1, 1)))
+	alexnet.add(Conv2D(512, (3, 3), padding='same'))
+	alexnet.add(BatchNormalization())
+	alexnet.add(Activation('relu'))
+	alexnet.add(MaxPooling2D(pool_size=(2, 2)))
+
+	# Layer 4
+	alexnet.add(ZeroPadding2D((1, 1)))
+	alexnet.add(Conv2D(1024, (3, 3), padding='same'))
+	alexnet.add(BatchNormalization())
+	alexnet.add(Activation('relu'))
+
+	# Layer 5
+	alexnet.add(ZeroPadding2D((1, 1)))
+	alexnet.add(Conv2D(1024, (3, 3), padding='same'))
+	alexnet.add(BatchNormalization())
+	alexnet.add(Activation('relu'))
+	alexnet.add(MaxPooling2D(pool_size=(2, 2)))
+
+	# Layer 6
+	alexnet.add(Flatten())
+	alexnet.add(Dense(3072))
+	alexnet.add(BatchNormalization())
+	alexnet.add(Activation('relu'))
+	alexnet.add(Dropout(0.5))
+
+	# Layer 7
+	alexnet.add(Dense(4096))
+	alexnet.add(BatchNormalization())
+	alexnet.add(Activation('relu'))
+	alexnet.add(Dropout(0.5))
+
+	# Layer 8
+	alexnet.add(Dense(n_classes))
+	alexnet.add(BatchNormalization())
+	alexnet.add(Activation('softmax'))
+
+	if weights is not None:
+		alexnet.load_weights(weights)
+
+	return alexnet
+"""

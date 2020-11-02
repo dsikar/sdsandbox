@@ -11,16 +11,16 @@ import json
 import os
 import pickle
 import random
-from time import strftime
 from datetime import datetime
+from time import strftime
 import numpy as np
 from PIL import Image
 from tensorflow import keras
-
-# conf.py, models.py
+import tensorflow as tf
 import conf
 import models
 from helper_functions import hf_mkdir
+from augmentation import augment, preprocess
 
 '''
 matplotlib can be a pain to setup. So handle the case where it is absent. When present,
@@ -55,7 +55,7 @@ def load_json(filename):
         data = json.load(fp)
     return data
 
-def generator(samples, batch_size=64,):
+def generator(samples, is_training, batch_size=64):
     '''
     Rather than keep all data in memory, we will make a function that keeps
     it's state and returns just the latest batch required via the yield command.
@@ -96,8 +96,14 @@ def generator(samples, batch_size=64,):
                     #PIL Image as a numpy array
                     image = np.array(image, dtype=np.float32)
 
+                    # argumentation
+                    if is_training and np.random.rand() < 0.6:
+                        image, steering = augment(image, steering)
+                    image = preprocess(image)
+
                     images.append(image)
-                    
+
+
                     if conf.num_outputs == 2:
                         controls.append([steering, throttle])
                     elif conf.num_outputs == 1:
@@ -166,8 +172,8 @@ def make_generators(inputs, limit=None, batch_size=64):
     print("num train/val", len(train_samples), len(validation_samples))
     
     # compile and train the model using the generator function
-    train_generator = generator(train_samples, batch_size=batch_size)
-    validation_generator = generator(validation_samples, batch_size=batch_size)
+    train_generator = generator(train_samples, True, batch_size=batch_size)
+    validation_generator = generator(validation_samples, False, batch_size=batch_size)
     
     n_train = len(train_samples)
     n_val = len(validation_samples)
@@ -191,11 +197,14 @@ def go(model_name, outdir, epochs=50, inputs='./log/*.jpg', limit=None):
     '''
     modify config.json to select the model to train.
     '''
-    model = models.get_nvidia_model(conf.num_outputs)
+    # model = models.get_nvidia_model_naoki(conf.num_outputs)
+    model = models.get_nvidia_model2(conf.num_outputs)
 
     callbacks = [
+        # running with naoki's model
         keras.callbacks.EarlyStopping(monitor='val_loss', patience=conf.training_patience, verbose=0),
         keras.callbacks.ModelCheckpoint(model_name, monitor='val_loss', save_best_only=True, verbose=0),
+        # keras.callbacks.ModelCheckpoint(('model-{epoch:03d}' +'_' + model_name), monitor='val_loss', save_best_only=True, verbose=0),
     ]
     
     batch_size = conf.training_batch_size
@@ -244,27 +253,21 @@ def go(model_name, outdir, epochs=50, inputs='./log/*.jpg', limit=None):
         pickle.dump(history.history, file_pi)    
     try:
         if do_plot:
-            # summarize history for loss
-            # working code
-            #plt.plot(history.history['loss'])
-            #plt.plot(history.history['val_loss'])
-            #plt.title('model loss')
-            #plt.ylabel('loss')
-            #plt.xlabel('epoch')
-
-            #plt.legend(['train', 'test'], loc='upper left')
-            #limg = fp + '_loss.png'
-            #plt.savefig('limg')
-            # summarize history for accuracy
-
             fig = plt.figure()
+            sp = '(l,vl,a,va)' + '{0:.3f}'.format(history.history['loss'][-1]) \
+                 + ',' + '{0:.3f}'.format(history.history['val_loss'][-1]) \
+                 + ',' + '{0:.3f}'.format(history.history['acc'][-1]) \
+                 + ',' + '{0:.3f}'.format(history.history['val_acc'][-1]) \
+                 + ' - ' + model_name.split('\\')[-1]
+            fig.suptitle(sp, fontsize=9)
+
             ax = fig.add_subplot(111)
             #ax.plot(time, Swdown, '-', label='Swdown')
-            ax.plot(history.history['loss'], '-', label='Training Loss')
-            ax.plot(history.history['val_loss'], '-', label='Validation Loss')
+            ax.plot(history.history['loss'], 'green', '-', label='Training Loss', )
+            ax.plot(history.history['val_loss'], 'blue', '-', label='Validation Loss')
             ax2 = ax.twinx()
-            ax2.plot(history.history['acc'], '-', label='Training Accuracy')
-            ax2.plot(history.history['val_acc'], '-', label='Validation Accuracy')
+            ax2.plot(history.history['acc'], 'red', '-', label='Training Accuracy')
+            ax2.plot(history.history['val_acc'], 'cyan', '-', label='Validation Accuracy')
             ax.legend(loc=2) # https://matplotlib.org/3.1.1/api/_as_gen/matplotlib.pyplot.legend.html
             ax.grid()
             ax.set_xlabel("Epoch")
@@ -284,9 +287,10 @@ if __name__ == "__main__":
     parser.add_argument('--outdir', type=str, help='output directory')
     parser.add_argument('--epochs', type=int, default=conf.training_default_epochs, help='number of epochs')
     parser.add_argument('--inputs', default='../dataset/unity/log/*.jpg', help='input mask to gather images')
+    parser.add_argument('--inputs', default='../dataset/unity/log2/*.jpg', help='input mask to gather images')
     parser.add_argument('--limit', type=int, default=None, help='max number of images to train with')
     args = parser.parse_args()
-    
+    #print(tf.__version__) 2.2.0
     go(args.model, args.outdir, epochs=args.epochs, limit=args.limit, inputs=args.inputs)
 
 #python train.py ..\outputs\mymodel_aug_90_x4_e200 --epochs=200

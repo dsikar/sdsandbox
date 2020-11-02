@@ -95,8 +95,11 @@ def generator(samples, batch_size=64,):
                     #PIL Image as a numpy array
                     image = np.array(image, dtype=np.float32)
 
+                    # image augmentation
+
                     images.append(image)
-                    
+
+
                     if conf.num_outputs == 2:
                         controls.append([steering, throttle])
                     elif conf.num_outputs == 1:

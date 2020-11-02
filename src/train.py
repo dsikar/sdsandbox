@@ -191,7 +191,7 @@ def go(model_name, outdir, epochs=50, inputs='./log/*.jpg', limit=None):
     modify config.json to select the model to train.
     '''
     # model = models.get_nvidia_model_naoki(conf.num_outputs)
-    model = models.get_nvidia_model1(conf.num_outputs)
+    model = models.get_nvidia_model2(conf.num_outputs)
 
     callbacks = [
         # running with naoki's model
@@ -252,15 +252,15 @@ def go(model_name, outdir, epochs=50, inputs='./log/*.jpg', limit=None):
                  + ',' + '{0:.3f}'.format(history.history['acc'][-1]) \
                  + ',' + '{0:.3f}'.format(history.history['val_acc'][-1]) \
                  + ' - ' + model_name.split('\\')[-1]
-            fig.suptitle(model_name, fontsize=9)
+            fig.suptitle(sp, fontsize=9)
 
             ax = fig.add_subplot(111)
             #ax.plot(time, Swdown, '-', label='Swdown')
-            ax.plot(history.history['loss'], '-', label='Training Loss')
-            ax.plot(history.history['val_loss'], '-', label='Validation Loss')
+            ax.plot(history.history['loss'], 'green', '-', label='Training Loss', )
+            ax.plot(history.history['val_loss'], 'blue', '-', label='Validation Loss')
             ax2 = ax.twinx()
-            ax2.plot(history.history['acc'], '-', label='Training Accuracy')
-            ax2.plot(history.history['val_acc'], '-', label='Validation Accuracy')
+            ax2.plot(history.history['acc'], 'red', '-', label='Training Accuracy')
+            ax2.plot(history.history['val_acc'], 'cyan', '-', label='Validation Accuracy')
             ax.legend(loc=2) # https://matplotlib.org/3.1.1/api/_as_gen/matplotlib.pyplot.legend.html
             ax.grid()
             ax.set_xlabel("Epoch")

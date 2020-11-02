@@ -20,6 +20,7 @@ import tensorflow as tf
 import conf
 import models
 from helper_functions import hf_mkdir
+from augmentation import augment, preprocess
 
 '''
 matplotlib can be a pain to setup. So handle the case where it is absent. When present,
@@ -54,7 +55,7 @@ def load_json(filename):
         data = json.load(fp)
     return data
 
-def generator(samples, batch_size=64,):
+def generator(samples, is_training, batch_size=64):
     '''
     Rather than keep all data in memory, we will make a function that keeps
     it's state and returns just the latest batch required via the yield command.
@@ -95,7 +96,10 @@ def generator(samples, batch_size=64,):
                     #PIL Image as a numpy array
                     image = np.array(image, dtype=np.float32)
 
-                    # image augmentation
+                    # argumentation
+                    if is_training and np.random.rand() < 0.6:
+                        image, steering = augment(image, steering)
+                    image = preprocess(image)
 
                     images.append(image)
 
@@ -168,8 +172,8 @@ def make_generators(inputs, limit=None, batch_size=64):
     print("num train/val", len(train_samples), len(validation_samples))
     
     # compile and train the model using the generator function
-    train_generator = generator(train_samples, batch_size=batch_size)
-    validation_generator = generator(validation_samples, batch_size=batch_size)
+    train_generator = generator(train_samples, True, batch_size=batch_size)
+    validation_generator = generator(validation_samples, False, batch_size=batch_size)
     
     n_train = len(train_samples)
     n_val = len(validation_samples)

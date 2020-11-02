@@ -194,9 +194,9 @@ def go(model_name, outdir, epochs=50, inputs='./log/*.jpg', limit=None):
 
     callbacks = [
         # running with naoki's model
-        # keras.callbacks.EarlyStopping(monitor='val_loss', patience=conf.training_patience, verbose=0),
-        # keras.callbacks.ModelCheckpoint(model_name, monitor='val_loss', save_best_only=True, verbose=0),
-        keras.callbacks.ModelCheckpoint(('model-{epoch:03d}' +'_' + model_name), monitor='val_loss', save_best_only=True, verbose=0),
+        keras.callbacks.EarlyStopping(monitor='val_loss', patience=conf.training_patience, verbose=0),
+        keras.callbacks.ModelCheckpoint(model_name, monitor='val_loss', save_best_only=True, verbose=0),
+        # keras.callbacks.ModelCheckpoint(('model-{epoch:03d}' +'_' + model_name), monitor='val_loss', save_best_only=True, verbose=0),
     ]
     
     batch_size = conf.training_batch_size

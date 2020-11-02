@@ -19,10 +19,10 @@ col = image_width
 ch = image_depth
 
 #when we wish to try training for steering and throttle:
-#num_outputs = 2
+num_outputs = 2
 
 #when steering alone:
-num_outputs = 1
+#num_outputs = 1
 
 throttle_out_scale = 1.0
 

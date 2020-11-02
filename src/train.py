@@ -11,13 +11,12 @@ import json
 import os
 import pickle
 import random
-from time import strftime
 from datetime import datetime
+from time import strftime
 import numpy as np
 from PIL import Image
 from tensorflow import keras
-
-# conf.py, models.py
+import tensorflow as tf
 import conf
 import models
 from helper_functions import hf_mkdir
@@ -191,11 +190,13 @@ def go(model_name, outdir, epochs=50, inputs='./log/*.jpg', limit=None):
     '''
     modify config.json to select the model to train.
     '''
-    model = models.get_nvidia_model(conf.num_outputs)
+    model = models.get_nvidia_model_naoki(conf.num_outputs)
 
     callbacks = [
-        keras.callbacks.EarlyStopping(monitor='val_loss', patience=conf.training_patience, verbose=0),
-        keras.callbacks.ModelCheckpoint(model_name, monitor='val_loss', save_best_only=True, verbose=0),
+        # running with naoki's model
+        # keras.callbacks.EarlyStopping(monitor='val_loss', patience=conf.training_patience, verbose=0),
+        # keras.callbacks.ModelCheckpoint(model_name, monitor='val_loss', save_best_only=True, verbose=0),
+        keras.callbacks.ModelCheckpoint(('model-{epoch:03d}' +'_' + model_name), monitor='val_loss', save_best_only=True, verbose=0),
     ]
     
     batch_size = conf.training_batch_size
@@ -273,7 +274,7 @@ if __name__ == "__main__":
     parser.add_argument('--inputs', default='../dataset/unity/log_sample/*.jpg', help='input mask to gather images')
     parser.add_argument('--limit', type=int, default=None, help='max number of images to train with')
     args = parser.parse_args()
-    
+    #print(tf.__version__) 2.2.0
     go(args.model, args.outdir, epochs=args.epochs, limit=args.limit, inputs=args.inputs)
 
 #python train.py ..\outputs\mymodel_aug_90_x4_e200 --epochs=200

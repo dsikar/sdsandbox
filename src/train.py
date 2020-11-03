@@ -96,9 +96,9 @@ def generator(samples, is_training, batch_size=64):
                     #PIL Image as a numpy array
                     image = np.array(image, dtype=np.float32)
 
-                    # argumentation
-                    if is_training and np.random.rand() < 0.6:
-                        image, steering = augment(image, steering)
+                    # argumentation - skipping for this run. Pre-process only.
+                    #if is_training and np.random.rand() < 0.6:
+                    #    image, steering = augment(image, steering)
                     image = preprocess(image)
 
                     images.append(image)

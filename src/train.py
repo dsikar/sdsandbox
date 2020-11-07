@@ -96,7 +96,7 @@ def generator(samples, is_training, batch_size=64):
                     #PIL Image as a numpy array
                     image = np.array(image, dtype=np.float32)
 
-                    # argumentation - skipping for this run. Pre-process only.
+                    # argumentation
                     if is_training and np.random.rand() < 0.6:
                         image, steering = augment(image, steering)
                     image = preprocess(image)
@@ -250,7 +250,7 @@ def go(model_name, outdir, epochs=50, inputs='./log/*.jpg', limit=None):
     # save history
     histfile = fp + '.history'
     with open(histfile, 'wb') as file_pi:
-        pickle.dump(history.history, file_pi)    
+        pickle.dump(history.history, file_pi)
     try:
         if do_plot:
             fig = plt.figure()
@@ -258,16 +258,16 @@ def go(model_name, outdir, epochs=50, inputs='./log/*.jpg', limit=None):
                  + ',' + '{0:.3f}'.format(history.history['val_loss'][-1]) \
                  + ',' + '{0:.3f}'.format(history.history['acc'][-1]) \
                  + ',' + '{0:.3f}'.format(history.history['val_acc'][-1]) \
-                 + ' - ' + model_name.split('\\')[-1]
+                 + ' - ' + model_name.split('/')[-1]
             fig.suptitle(sp, fontsize=9)
 
             ax = fig.add_subplot(111)
             #ax.plot(time, Swdown, '-', label='Swdown')
-            ax.plot(history.history['loss'], 'green', '-', label='Training Loss', )
-            ax.plot(history.history['val_loss'], 'blue', '-', label='Validation Loss')
+            ax.plot(history.history['loss'], 'r-', label='Training Loss', )
+            ax.plot(history.history['val_loss'], 'c-', label='Validation Loss')
             ax2 = ax.twinx()
-            ax2.plot(history.history['acc'], 'red', '-', label='Training Accuracy')
-            ax2.plot(history.history['val_acc'], 'cyan', '-', label='Validation Accuracy')
+            ax2.plot(history.history['acc'], 'm-', label='Training Accuracy')
+            ax2.plot(history.history['val_acc'], 'y-', label='Validation Accuracy')
             ax.legend(loc=2) # https://matplotlib.org/3.1.1/api/_as_gen/matplotlib.pyplot.legend.html
             ax.grid()
             ax.set_xlabel("Epoch")
@@ -278,15 +278,15 @@ def go(model_name, outdir, epochs=50, inputs='./log/*.jpg', limit=None):
             ax2.legend(loc=1)
             aimg = fp + '_accuracy.png'
             plt.savefig(aimg)
-    except:
-        print("problems with loss graph")
+    except Exception as e:
+        print("Failed to save accuracy/loss graph: " + str(e))
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='train script')
     parser.add_argument('--model', type=str, help='model name')
     parser.add_argument('--outdir', type=str, help='output directory')
     parser.add_argument('--epochs', type=int, default=conf.training_default_epochs, help='number of epochs')
-    parser.add_argument('--inputs', default='../dataset/unity/log2/*.jpg', help='input mask to gather images')
+    parser.add_argument('--inputs', default='../dataset/unity/log_sample/*.jpg', help='input mask to gather images')
     parser.add_argument('--limit', type=int, default=None, help='max number of images to train with')
     args = parser.parse_args()
     #print(tf.__version__) 2.2.0

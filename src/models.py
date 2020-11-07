@@ -59,6 +59,7 @@ def get_nvidia_model1(num_outputs):
     model = Model(inputs=[img_in], outputs=outputs)
     opt = Adam(lr=0.0001)
     model.compile(optimizer=opt, loss="mse", metrics=['acc'])
+    # might want to try metrics=['acc', 'loss']  https://stackoverflow.com/questions/51047676/how-to-get-accuracy-of-model-using-keras
     return model
 
 

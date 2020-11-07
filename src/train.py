@@ -96,7 +96,7 @@ def generator(samples, is_training, batch_size=64):
                     #PIL Image as a numpy array
                     image = np.array(image, dtype=np.float32)
 
-                    # argumentation
+                    # argumentation - skipping for this run. Pre-process only.
                     if is_training and np.random.rand() < 0.6:
                         image, steering = augment(image, steering)
                     image = preprocess(image)
@@ -198,7 +198,7 @@ def go(model_name, outdir, epochs=50, inputs='./log/*.jpg', limit=None):
     modify config.json to select the model to train.
     '''
     # model = models.get_nvidia_model_naoki(conf.num_outputs)
-    model = models.get_nvidia_model2(conf.num_outputs)
+    model = models.get_nvidia_model1(conf.num_outputs)
 
     callbacks = [
         # running with naoki's model

@@ -22,7 +22,8 @@ import numpy as np
 from gym_donkeycar.core.fps import FPSTimer
 from gym_donkeycar.core.message import IMesgHandler
 from gym_donkeycar.core.sim_client import SimClient
-
+# same preprocess as for training
+from augmentation import augment, preprocess
 import conf
 import models
 
@@ -91,6 +92,8 @@ class DonkeySimMsgHandler(IMesgHandler):
         imgString = data["image"]
         image = Image.open(BytesIO(base64.b64decode(imgString)))
         img_arr = np.asarray(image, dtype=np.float32)
+        # same preprocessing as for training
+        img_arr = preprocess(img_arr)
         self.img_arr = img_arr.reshape((1,) + img_arr.shape)
 
         if self.image_cb is not None:

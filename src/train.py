@@ -78,9 +78,8 @@ def generator(samples, is_training, batch_size=64):
             
             images = []
             controls = []
-            for fullpath in batch_samples:
+            for fullpath in batch_samples: # not sure this is doing anything, as images are not being flipped
                 try:
-                
                     frame_number = os.path.basename(fullpath).split("_")[0]
                     json_filename = os.path.join(os.path.dirname(fullpath), "record_" + frame_number + ".json")
                     data = load_json(json_filename)
@@ -96,13 +95,12 @@ def generator(samples, is_training, batch_size=64):
                     #PIL Image as a numpy array
                     image = np.array(image, dtype=np.float32)
 
-                    # argumentation
+                    # augmentation
                     if is_training and np.random.rand() < 0.6:
                         image, steering = augment(image, steering)
                     image = preprocess(image)
 
                     images.append(image)
-
 
                     if conf.num_outputs == 2:
                         controls.append([steering, throttle])
@@ -198,7 +196,7 @@ def go(model_name, outdir, epochs=50, inputs='./log/*.jpg', limit=None):
     modify config.json to select the model to train.
     '''
     # model = models.get_nvidia_model_naoki(conf.num_outputs)
-    model = models.get_nvidia_model1(conf.num_outputs)
+    model = models.get_nvidia_model2(conf.num_outputs)
 
     callbacks = [
         # running with naoki's model
@@ -286,7 +284,7 @@ if __name__ == "__main__":
     parser.add_argument('--model', type=str, help='model name')
     parser.add_argument('--outdir', type=str, help='output directory')
     parser.add_argument('--epochs', type=int, default=conf.training_default_epochs, help='number of epochs')
-    parser.add_argument('--inputs', default='../dataset/unity/log_sample/*.jpg', help='input mask to gather images')
+    parser.add_argument('--inputs', default='../dataset/unity/jungle1/log/*.jpg', help='input mask to gather images')
     parser.add_argument('--limit', type=int, default=None, help='max number of images to train with')
     args = parser.parse_args()
     #print(tf.__version__) 2.2.0

@@ -9,9 +9,12 @@ training_default_epochs = 100
 training_default_aug_mult = 1
 
 training_default_aug_percent = 0.0
-
-image_width = 160
-image_height = 120
+#nvidia 1
+#image_width = 160
+#image_height = 120
+#nvidia 2
+image_width = 200
+image_height = 66
 image_depth = 3
 
 row = image_height

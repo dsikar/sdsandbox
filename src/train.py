@@ -21,6 +21,7 @@ import conf
 import models
 from helper_functions import hf_mkdir
 from augmentation import augment, preprocess
+import cv2
 
 '''
 matplotlib can be a pain to setup. So handle the case where it is absent. When present,
@@ -94,12 +95,19 @@ def generator(samples, is_training, batch_size=64):
 
                     #PIL Image as a numpy array
                     image = np.array(image, dtype=np.float32)
-
-                    # augmentation
-                    if is_training and np.random.rand() < 0.6:
-                        image, steering = augment(image, steering)
-                    image = preprocess(image)
-
+                    image = cv2.resize(image, (200, 66), cv2.INTER_AREA)
+                    # resize for nvidia
+                    # nvidia 2
+                    # image = cv2.resize(image, (200, 66), cv2.INTER_AREA)
+                    # augmentation only for training
+                    if(conf.aug):
+                        if is_training and np.random.rand() < 0.6:
+                            image, steering = augment(image, steering)
+                    if (conf.preproc):
+                        image = preprocess(image)
+                    # for nvidia2 model
+                    # 224 224 Alexnet
+                    # image = cv2.resize(image, (224, 224), cv2.INTER_AREA)
                     images.append(image)
 
                     if conf.num_outputs == 2:
@@ -127,6 +135,8 @@ def get_files(filemask):
     '''
     #matches = glob.glob(os.path.expanduser(filemask))
     #return matches
+    # bug in filemask? It stopped working
+    filemask = '../dataset/unity/log2/*.jpg'
     filemask = os.path.expanduser(filemask)
     path, mask = os.path.split(filemask)
     
@@ -152,7 +162,7 @@ def train_test_split(lines, test_perc):
 
     return train, test
 
-def make_generators(inputs, limit=None, batch_size=64):
+def make_generators(inputs, limit=None, batch_size=conf.batch_size):
     '''
     load the job spec from the csv and create some generator for training
     '''
@@ -196,7 +206,13 @@ def go(model_name, outdir, epochs=50, inputs='./log/*.jpg', limit=None):
     modify config.json to select the model to train.
     '''
     # model = models.get_nvidia_model_naoki(conf.num_outputs)
-    model = models.get_nvidia_model2(conf.num_outputs)
+    # interpreter seems to be playing up, dummy assignment to appease
+    if(conf.model_name=='nvidia1'):
+        model = models.nvidia_model1(conf.num_outputs)
+    elif(conf.model_name=='nvidia2'):
+        model = models.nvidia_model2(conf.num_outputs)
+    elif (conf.model_name == 'nvidia_baseline'):
+        model = models.nvidia_baseline(conf.num_outputs)
 
     callbacks = [
         # running with naoki's model
@@ -220,13 +236,17 @@ def go(model_name, outdir, epochs=50, inputs='./log/*.jpg', limit=None):
 
     print("steps_per_epoch", steps_per_epoch, "validation_steps", validation_steps)
     s1 = strftime("%Y%m%d%H%M%S")
-    history = model.fit_generator(train_generator, 
-        steps_per_epoch = steps_per_epoch,
-        validation_data = validation_generator,
-        validation_steps = validation_steps,
-        epochs=epochs,
-        verbose=1,
-        callbacks=callbacks)
+    try:
+        history = model.fit_generator(train_generator,
+            steps_per_epoch = steps_per_epoch,
+            validation_data = validation_generator,
+            validation_steps = validation_steps,
+            epochs=epochs,
+            verbose=1,
+            callbacks=callbacks)
+    except Exception as e:
+        print("Failed fit generator: " + str(e))
+
     s2 = strftime("%Y%m%d%H%M%S")
     FMT = "%Y%m%d%H%M%S"
     tdelta = datetime.strptime(s2, FMT) - datetime.strptime(s1, FMT)
@@ -279,6 +299,9 @@ def go(model_name, outdir, epochs=50, inputs='./log/*.jpg', limit=None):
     except Exception as e:
         print("Failed to save accuracy/loss graph: " + str(e))
 
+def parse_bool(b):
+    return b == "True"
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='train script')
     parser.add_argument('--model', type=str, help='model name')
@@ -286,7 +309,14 @@ if __name__ == "__main__":
     parser.add_argument('--epochs', type=int, default=conf.training_default_epochs, help='number of epochs')
     parser.add_argument('--inputs', default='../dataset/unity/jungle1/log/*.jpg', help='input mask to gather images')
     parser.add_argument('--limit', type=int, default=None, help='max number of images to train with')
+    parser.add_argument('--aug', type=parse_bool, default=False, help='image augmentation flag')
+    parser.add_argument('--preproc', type=parse_bool, default=False, help='image preprocessing flag')
+
     args = parser.parse_args()
+
+    conf.aug = args.aug
+    conf.preproc = args.preproc
+    conf.model_name = args.model
     #print(tf.__version__) 2.2.0
     go(args.model, args.outdir, epochs=args.epochs, limit=args.limit, inputs=args.inputs)
 

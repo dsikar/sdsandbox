@@ -1,9 +1,9 @@
 import cv2, os
 import numpy as np
 import matplotlib.image as mpimg
+import conf
 
-IMAGE_HEIGHT, IMAGE_WIDTH
-IMAGE_HEIGHT, IMAGE_WIDTH, IMAGE_CHANNELS = 66, 200, 3
+IMAGE_HEIGHT, IMAGE_WIDTH, IMAGE_CHANNELS = conf.image_height, conf.image_width, 3
 # IMAGE_HEIGHT, IMAGE_WIDTH, IMAGE_CHANNELS = 120, 160, 3
 INPUT_SHAPE = (IMAGE_HEIGHT, IMAGE_WIDTH, IMAGE_CHANNELS)
 
@@ -19,6 +19,7 @@ def crop(image):
     """
     Crop the image (removing the sky at the top and the car front at the bottom)
     """
+    # this breaks nvidia_baseline
     return image[60:-25, :, :] # remove the sky and the car front
 
 
@@ -127,8 +128,8 @@ def augment(image, steering_angle, range_x=100, range_y=10):
     Generate an augumented image and adjust steering angle.
     (The steering angle is associated with the center image)
     """
-    # resize first to fit neural net design
-    image = cv2.resize(image, (ORIG_IMAGE_WIDTH, ORIG_IMAGE_HEIGHT), cv2.INTER_AREA)
+    # resize first to fit neural net design - nvidia2
+    # image = cv2.resize(image, (320, 160), cv2.INTER_AREA)
     #image, steering_angle = choose_image(data_dir, center, left, right, steering_angle)
     image, steering_angle = random_flip(image, steering_angle)
     image, steering_angle = random_translate(image, steering_angle, range_x, range_y)

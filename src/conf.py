@@ -22,13 +22,14 @@ model_name = 'nvidia1'
 # size augmentation process is expecting, i.e. what came from camera
 # AlexNet 224x224, Udacity 320x160, Unity 160x120, etc
 
-image_width = 320
-image_height = 160
+image_width = 160
+image_height = 120
 image_depth = 3
 
 # size network is expecting
-image_height_net = 66
-image_width_net = 200
+image_width_net = 160
+image_height_net = 120
+
 
 row = image_height_net
 col = image_width_net

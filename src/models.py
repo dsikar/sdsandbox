@@ -73,7 +73,8 @@ def nvidia_baseline(num_outputs):
     outputs.append(Dense(num_outputs, activation='linear', name='steering')(x))
 
     model = Model(inputs=[img_in], outputs=outputs)
-    opt = Adadelta(learning_rate=0.001, rho=0.95, epsilon=1e-07, name="Adadelta")
+    # opt = Adadelta(learning_rate=0.001, rho=0.95, epsilon=1e-07, name="Adadelta")
+    opt = Adam(lr=0.0001)
     model.compile(optimizer=opt, loss="mse", metrics=['acc'])
 
     # add weight decay

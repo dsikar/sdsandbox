@@ -78,12 +78,13 @@ def nvidia_baseline(num_outputs):
 
     # add weight decay
     # https://stackoverflow.com/questions/41260042/global-weight-decay-in-keras
-    alpha = 0.0005  # weight decay coefficient
-    for layer in model.layers:
-        if isinstance(layer, Conv2D) or isinstance(layer, Dense):
-            layer.add_loss(lambda: regularizers.l2(alpha)(layer.kernel))
-        if hasattr(layer, 'bias_regularizer') and layer.use_bias:
-            layer.add_loss(lambda: regularizers.l2(alpha)(layer.bias))
+    #alpha = 0.0005  # weight decay coefficient
+    #for layer in model.layers:
+    #    if isinstance(layer, Conv2D) or isinstance(layer, Dense):
+    #        layer.add_loss(lambda: regularizers.l2(alpha)(layer.kernel))
+    #    if hasattr(layer, 'bias_regularizer') and layer.use_bias:
+    #        layer.add_loss(lambda: regularizers.l2(alpha)(layer.bias))
+
     return model
 
 def nvidia_model1(num_outputs):

@@ -2,6 +2,7 @@
 Train
 Train your nerual network
 Author: Tawn Kramer
+To fix missing .jpeg files, see utils/
 '''
 from __future__ import print_function
 

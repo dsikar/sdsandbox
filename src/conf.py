@@ -34,11 +34,10 @@ row = image_height_net
 col = image_width_net
 ch = image_depth
 
-#when we wish to try training for steering and throttle:
-#num_outputs = 2
-
-#when steering alone:
-num_outputs = 1
+# training for steering and throttle:
+num_outputs = 2
+# steering alone:
+# num_outputs = 1
 
 throttle_out_scale = 1.0
 # alexnet

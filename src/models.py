@@ -50,24 +50,24 @@ def nvidia_baseline(num_outputs):
     # RGB values assumed to be normalized and not centered i.e. x/127.5 - 1.
     x = Lambda(lambda x: x / 255.0)(x)
     x = Conv2D(24, (5, 5), strides=(2, 2), activation='relu', name="conv2d_1", kernel_initializer=batch_init, bias_initializer='zeros')(x)
-    x = Dropout(drop)(x)
+    #x = Dropout(drop)(x)
     x = Conv2D(36, (5, 5), strides=(2, 2), activation='relu', name="conv2d_2", kernel_initializer=batch_init, bias_initializer='ones')(x) #2nd
-    x = Dropout(drop)(x)
+    #x = Dropout(drop)(x)
     x = Conv2D(48, (5, 5), strides=(2, 2), activation='relu', name="conv2d_3", kernel_initializer=batch_init, bias_initializer='zeros')(x)
-    x = Dropout(drop)(x)
+    #x = Dropout(drop)(x)
     x = Conv2D(64, (3, 3), activation='relu', name="conv2d_4", kernel_initializer=batch_init, bias_initializer='ones')(x) # default strides=(1,1) # 4th
-    x = Dropout(drop)(x)
+    #x = Dropout(drop)(x)
     x = Conv2D(64, (3, 3), activation='relu', name="conv2d_5", kernel_initializer=batch_init, bias_initializer='ones')(x) #5th
     x = Dropout(drop)(x)
     x = Flatten(name='flattened')(x)
     x = Dense(1164, activation='relu', name="dense_1", kernel_initializer=batch_init, bias_initializer='ones')(x)
-    x = Dropout(drop)(x)
+    #x = Dropout(drop)(x)
     x = Dense(100, activation='relu', name="dense_2", kernel_initializer=batch_init, bias_initializer='ones')(x)
-    x = Dropout(drop)(x)
+    #x = Dropout(drop)(x)
     x = Dense(50, activation='relu', name="dense_3", kernel_initializer=batch_init, bias_initializer='ones')(x) # Added in Naoki's model
-    x = Dropout(drop)(x)
+    #x = Dropout(drop)(x)
     x = Dense(10, activation='relu', name="dense_4", kernel_initializer=batch_init, bias_initializer='ones')(x)
-    # x = Dropout(drop)(x)
+    #x = Dropout(drop)(x)
     outputs = []
     # outputs.append(Dense(num_outputs, activation='linear', name='steering_throttle')(x))
     outputs.append(Dense(num_outputs, activation='linear', name='steering')(x))

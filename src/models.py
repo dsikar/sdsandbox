@@ -43,28 +43,28 @@ def nvidia_baseline(num_outputs):
     # Adjust sizes accordingly in conf.py
     row, col, ch = conf.row, conf.col, conf.ch
 
-    drop = 0.25 # see "Correspondence with authors"
-    batch_init = initializers.glorot_uniform #  Original AlexNet initializers.RandomNormal(mean=0., stddev=0.01);
+    drop = 0.5 # see "Correspondence with authors"
+    # batch_init = initializers.glorot_uniform #  Original AlexNet initializers.RandomNormal(mean=0., stddev=0.01);
     img_in = Input(shape=(row, col, ch), name='img_in')
     x = img_in
     # RGB values assumed to be normalized and not centered i.e. x/127.5 - 1.
     x = Lambda(lambda x: x / 255.0)(x)
-    x = Conv2D(24, (5, 5), strides=(2, 2), activation='relu', name="conv2d_1", kernel_initializer=batch_init, bias_initializer='zeros')(x)
+    x = Conv2D(24, (5, 5), strides=(2, 2), activation='relu', name="conv2d_1")(x)
     #x = Dropout(drop)(x)
-    x = Conv2D(36, (5, 5), strides=(2, 2), activation='relu', name="conv2d_2", kernel_initializer=batch_init, bias_initializer='zeros')(x) #2nd
+    x = Conv2D(36, (5, 5), strides=(2, 2), activation='relu', name="conv2d_2")(x) #2nd
     #x = Dropout(drop)(x)
-    x = Conv2D(48, (5, 5), strides=(2, 2), activation='relu', name="conv2d_3", kernel_initializer=batch_init, bias_initializer='zeros')(x)
+    x = Conv2D(48, (5, 5), strides=(2, 2), activation='relu', name="conv2d_3")(x)
     #x = Dropout(drop)(x)
-    x = Conv2D(64, (3, 3), activation='relu', name="conv2d_4", kernel_initializer=batch_init, bias_initializer='zeros')(x) # default strides=(1,1) # 4th
+    x = Conv2D(64, (3, 3), activation='relu', name="conv2d_4")(x) # default strides=(1,1) # 4th
     #x = Dropout(drop)(x)
-    x = Conv2D(64, (3, 3), activation='relu', name="conv2d_5", kernel_initializer=batch_init, bias_initializer='zeros')(x) #5th
+    x = Conv2D(64, (3, 3), activation='relu', name="conv2d_5")(x) #5th
     x = Dropout(drop)(x)
     x = Flatten(name='flattened')(x)
     # x = Dense(1164, activation='relu', name="dense_1", kernel_initializer=batch_init, bias_initializer='ones')(x)
     #x = Dropout(drop)(x)
-    x = Dense(100, activation='relu', name="dense_2", kernel_initializer=batch_init, bias_initializer='zeros')(x)
+    x = Dense(100, activation='relu', name="dense_2")(x)
     #x = Dropout(drop)(x)
-    x = Dense(50, activation='relu', name="dense_3", kernel_initializer=batch_init, bias_initializer='zeros')(x) # Added in Naoki's model
+    x = Dense(50, activation='relu', name="dense_3")(x) # Added in Naoki's model
     #x = Dropout(drop)(x)
     # x = Dense(10, activation='relu', name="dense_4", kernel_initializer=batch_init, bias_initializer='zeros')(x)
     #x = Dropout(drop)(x)

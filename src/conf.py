@@ -1,6 +1,6 @@
 import math
 
-training_patience = 60
+training_patience = 6
 
 training_batch_size = 128
 

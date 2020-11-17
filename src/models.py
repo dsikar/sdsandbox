@@ -67,7 +67,7 @@ def nvidia_baseline(num_outputs):
     x = Dense(50, activation='relu', name="dense_3", kernel_initializer=batch_init, bias_initializer='ones')(x) # Added in Naoki's model
     x = Dropout(drop)(x)
     x = Dense(10, activation='relu', name="dense_4", kernel_initializer=batch_init, bias_initializer='ones')(x)
-    x = Dropout(drop)(x)
+    # x = Dropout(drop)(x)
     outputs = []
     # outputs.append(Dense(num_outputs, activation='linear', name='steering_throttle')(x))
     outputs.append(Dense(num_outputs, activation='linear', name='steering')(x))
@@ -84,7 +84,6 @@ def nvidia_baseline(num_outputs):
     #        layer.add_loss(lambda: regularizers.l2(alpha)(layer.kernel))
     #    if hasattr(layer, 'bias_regularizer') and layer.use_bias:
     #        layer.add_loss(lambda: regularizers.l2(alpha)(layer.bias))
-
     return model
 
 def nvidia_model1(num_outputs):

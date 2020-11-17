@@ -53,7 +53,7 @@ def nvidia_baseline(num_outputs):
     x = Dropout(drop)(x)
     x = Conv2D(32, (5, 5), strides=(2, 2), activation='relu', name="conv2d_2")(x) #2nd
     x = Dropout(drop)(x)
-    x = Conv2D(48, (5, 5), strides=(2, 2), activation='relu', name="conv2d_3")(x)
+    x = Conv2D(64, (5, 5), strides=(2, 2), activation='relu', name="conv2d_3")(x)
     x = Dropout(drop)(x)
     x = Conv2D(64, (3, 3), activation='relu', name="conv2d_4")(x) # default strides=(1,1) # 4th
     x = Dropout(drop)(x)

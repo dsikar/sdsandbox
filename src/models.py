@@ -44,7 +44,7 @@ def nvidia_baseline(num_outputs):
     row, col, ch = conf.row, conf.col, conf.ch
 
     drop = 0.25 # see "Correspondence with authors"
-    batch_init = initializers.RandomNormal(mean=0., stddev=0.01);
+    batch_init = initializers.glorot_uniform #  Original AlexNet initializers.RandomNormal(mean=0., stddev=0.01);
     img_in = Input(shape=(row, col, ch), name='img_in')
     x = img_in
     # RGB values assumed to be normalized and not centered i.e. x/127.5 - 1.

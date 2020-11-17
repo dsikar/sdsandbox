@@ -95,7 +95,6 @@ def generator(samples, is_training, batch_size=64):
 
                     #PIL Image as a numpy array
                     image = np.array(image, dtype=np.float32)
-                    image = cv2.resize(image, (200, 66), cv2.INTER_AREA)
                     # resize for nvidia
                     # nvidia 2
                     # image = cv2.resize(image, (200, 66), cv2.INTER_AREA)
@@ -108,6 +107,7 @@ def generator(samples, is_training, batch_size=64):
                     # for nvidia2 model
                     # 224 224 Alexnet
                     # image = cv2.resize(image, (224, 224), cv2.INTER_AREA)
+                    # for NVIDIA should be 200x66
                     images.append(image)
 
                     if conf.num_outputs == 2:
@@ -131,12 +131,11 @@ def generator(samples, is_training, batch_size=64):
 
 def get_files(filemask):
     '''
-    use a filemask and search a path recursively for matches
+    Use a filemask and search a path recursively for matches
+    Inputs
+        filemask: string passed as command line option, must not be enclosed in quotes
     '''
-    #matches = glob.glob(os.path.expanduser(filemask))
-    #return matches
-    # bug in filemask? It stopped working
-    filemask = '../dataset/unity/log2/*.jpg'
+
     filemask = os.path.expanduser(filemask)
     path, mask = os.path.split(filemask)
     
@@ -211,8 +210,13 @@ def go(model_name, outdir, epochs=50, inputs='./log/*.jpg', limit=None):
         model = models.nvidia_model1(conf.num_outputs)
     elif(conf.model_name=='nvidia2'):
         model = models.nvidia_model2(conf.num_outputs)
-    elif (conf.model_name == 'nvidia_baseline'):
+    elif(conf.model_name == 'nvidia_baseline'):
         model = models.nvidia_baseline(conf.num_outputs)
+    else:
+        try:
+            raise ValueError
+        except ValueError:
+            print('No valid model name given. Please check command line arguments and model.py')
 
     callbacks = [
         # running with naoki's model
@@ -246,7 +250,11 @@ def go(model_name, outdir, epochs=50, inputs='./log/*.jpg', limit=None):
             callbacks=callbacks)
     except Exception as e:
         print("Failed fit generator: " + str(e))
-
+    # e =  "Input to reshape is a tensor with 147456 values, but the requested shape requires a multiple of 27456". errpr rao with jungle1 dataset
+    # 	 [[node model/flattened/Reshape (defined at /git/sdsandbox/src/train.py:250) ]] [Op:__inference_train_function_2398]
+    #
+    # Function call stack:
+    # train_function
     s2 = strftime("%Y%m%d%H%M%S")
     FMT = "%Y%m%d%H%M%S"
     tdelta = datetime.strptime(s2, FMT) - datetime.strptime(s1, FMT)

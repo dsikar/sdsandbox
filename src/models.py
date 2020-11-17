@@ -39,6 +39,8 @@ def nvidia_baseline(num_outputs):
     Best regards,
     Urs
     '''
+    # note row and col values are now from _NET
+    # Adjust sizes accordingly in conf.py
     row, col, ch = conf.row, conf.col, conf.ch
 
     drop = 0.25 # see "Correspondence with authors"

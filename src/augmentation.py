@@ -4,9 +4,8 @@ import matplotlib.image as mpimg
 import conf
 
 IMAGE_HEIGHT, IMAGE_WIDTH, IMAGE_CHANNELS = conf.image_height, conf.image_width, 3
-# IMAGE_HEIGHT, IMAGE_WIDTH, IMAGE_CHANNELS = 120, 160, 3
 INPUT_SHAPE = (IMAGE_HEIGHT, IMAGE_WIDTH, IMAGE_CHANNELS)
-
+IMAGE_HEIGHT_NET, IMAGE_WIDTH_NET =  conf.image_height_net, conf.image_width_net
 
 def load_image(image_path):
     """
@@ -27,7 +26,7 @@ def resize(image):
     """
     Resize the image to the input shape used by the network model
     """
-    return cv2.resize(image, (IMAGE_WIDTH, IMAGE_HEIGHT), cv2.INTER_AREA)
+    return cv2.resize(image, (IMAGE_WIDTH_NET, IMAGE_HEIGHT_NET), cv2.INTER_AREA)
 
 
 def rgb2yuv(image):
@@ -128,8 +127,9 @@ def augment(image, steering_angle, range_x=100, range_y=10):
     Generate an augumented image and adjust steering angle.
     (The steering angle is associated with the center image)
     """
-    # resize first to fit neural net design - nvidia2
-    # image = cv2.resize(image, (320, 160), cv2.INTER_AREA)
+    # resize according to expected input shape e.g. AlexNet 224x224, Udacity 320x160, Unity 160x120, etc
+    # set in conf.py
+    image = cv2.resize(image, (IMAGE_WIDTH, IMAGE_HEIGHT), cv2.INTER_AREA)
     #image, steering_angle = choose_image(data_dir, center, left, right, steering_angle)
     image, steering_angle = random_flip(image, steering_angle)
     image, steering_angle = random_translate(image, steering_angle, range_x, range_y)

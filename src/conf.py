@@ -1,6 +1,6 @@
 import math
 
-training_patience = 6
+training_patience = 60
 
 training_batch_size = 128
 
@@ -19,13 +19,19 @@ model_name = 'nvidia1'
 #image_height = 120
 #nvidia 2
 
-# nvidia baseline
-image_width = 200
-image_height = 66
+# size augmentation process is expecting, i.e. what came from camera
+# AlexNet 224x224, Udacity 320x160, Unity 160x120, etc
+
+image_width = 320
+image_height = 160
 image_depth = 3
 
-row = image_height
-col = image_width
+# size network is expecting
+image_height_net = 66
+image_width_net = 200
+
+row = image_height_net
+col = image_width_net
 ch = image_depth
 
 #when we wish to try training for steering and throttle:

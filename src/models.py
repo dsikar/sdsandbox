@@ -55,9 +55,9 @@ def nvidia_baseline(num_outputs):
     x = Dropout(drop)(x)
     x = Conv2D(64, (5, 5), strides=(2, 2), activation='relu', name="conv2d_3")(x)
     x = Dropout(drop)(x)
-    x = Conv2D(64, (3, 3), activation='relu', name="conv2d_4")(x) # default strides=(1,1) # 4th
+    x = Conv2D(64, (3, 3), strides=(1, 1), activation='relu', name="conv2d_4")(x) # default strides=(1,1) # 4th
     x = Dropout(drop)(x)
-    x = Conv2D(64, (3, 3), activation='relu', name="conv2d_5")(x) #5th
+    x = Conv2D(64, (3, 3), strides=(1, 1), activation='relu', name="conv2d_5")(x) #5th
     x = Dropout(drop)(x)
     x = Flatten(name='flattened')(x)
     # x = Dense(1164, activation='relu', name="dense_1", kernel_initializer=batch_init, bias_initializer='ones')(x)

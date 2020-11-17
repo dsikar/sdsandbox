@@ -70,7 +70,7 @@ def nvidia_baseline(num_outputs):
     x = Dropout(drop)(x)
     outputs = []
     # outputs.append(Dense(num_outputs, activation='linear', name='steering_throttle')(x))
-    outputs.append(Dense(num_outputs, name='steering')(x))
+    outputs.append(Dense(num_outputs, activation='linear', name='steering')(x))
 
     model = Model(inputs=[img_in], outputs=outputs)
     opt = Adadelta(learning_rate=0.001, rho=0.95, epsilon=1e-07, name="Adadelta")

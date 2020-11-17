@@ -2,7 +2,7 @@ import math
 
 training_patience = 6
 
-training_batch_size = 128
+training_batch_size = 64 # as per camber working runs
 
 training_default_epochs = 100
 

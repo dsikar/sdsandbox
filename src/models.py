@@ -43,20 +43,20 @@ def nvidia_baseline(num_outputs):
     # Adjust sizes accordingly in conf.py
     row, col, ch = conf.row, conf.col, conf.ch
 
-    drop = 0.5 # see "Correspondence with authors"
+    drop = 0.1 # spreading droupout
     # batch_init = initializers.glorot_uniform #  Original AlexNet initializers.RandomNormal(mean=0., stddev=0.01);
     img_in = Input(shape=(row, col, ch), name='img_in')
     x = img_in
     # RGB values assumed to be normalized and not centered i.e. x/127.5 - 1.
     x = Lambda(lambda x: x / 255.0)(x)
     x = Conv2D(24, (5, 5), strides=(2, 2), activation='relu', name="conv2d_1")(x)
-    #x = Dropout(drop)(x)
+    x = Dropout(drop)(x)
     x = Conv2D(36, (5, 5), strides=(2, 2), activation='relu', name="conv2d_2")(x) #2nd
-    #x = Dropout(drop)(x)
+    x = Dropout(drop)(x)
     x = Conv2D(48, (5, 5), strides=(2, 2), activation='relu', name="conv2d_3")(x)
-    #x = Dropout(drop)(x)
+    x = Dropout(drop)(x)
     x = Conv2D(64, (3, 3), activation='relu', name="conv2d_4")(x) # default strides=(1,1) # 4th
-    #x = Dropout(drop)(x)
+    x = Dropout(drop)(x)
     x = Conv2D(64, (3, 3), activation='relu', name="conv2d_5")(x) #5th
     x = Dropout(drop)(x)
     x = Flatten(name='flattened')(x)

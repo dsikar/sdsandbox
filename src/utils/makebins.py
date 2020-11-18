@@ -1,12 +1,14 @@
 """
-Go though Unity3D generated files, delete .jpg if a corresponding .json file does not exist
-$ python3 jsonclean.py --inputs=../../dataset/unity/log/*.jpg --delete=[False|True]
+Go though Unity3D generated files, get all steering angles and plot a histogram
+$ python3 makebins.py --inputs=../../dataset/unity/log/*.jpg
 """
 
 import os
 import argparse
 import fnmatch
 import json
+import seaborn as sns
+import os
 
 
 def load_json(filename):
@@ -14,8 +16,8 @@ def load_json(filename):
         data = json.load(fp)
     return data
 
-def cleanjson(filemask, delete):
-    # filemask = '~/git/sdsandbox/dataset/unity/log/*.jpg'
+def cleanjson(filemask):
+
     filemask = os.path.expanduser(filemask)
     path, mask = os.path.split(filemask)
 
@@ -24,21 +26,13 @@ def cleanjson(filemask, delete):
         for filename in fnmatch.filter(filenames, mask):
             matches.append(os.path.join(root, filename))
 
-    # deleted file count
-    dc = 0
+    # steering values
+    svals = []
     for fullpath in matches:
             frame_number = os.path.basename(fullpath).split("_")[0]
             json_filename = os.path.join(os.path.dirname(fullpath), "record_" + frame_number + ".json")
-            try:
-                load_json(json_filename)
-            except:
-                print('No matching .json file for: ', fullpath)
-                # No matching .json file for:  ../../dataset/unity/log/logs_Mon_Jul_13_09_03_21_2020/35095_cam-image_array_.jpg
-                if(delete):
-                    print("File deleted.")
-                    os.remove(fullpath)
-                    dc += 1
-                continue
+            jobj = load_json(json_filename)
+            svals.append(jobj['user/angle'])
 
     print("Files deleted:", dc)
 def parse_bool(b):
@@ -47,7 +41,6 @@ def parse_bool(b):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='JSON missing file handler/cleaner')
     parser.add_argument('--inputs', default='../dataset/unity/jungle1/log/*.jpg', help='input mask to gather images')
-    parser.add_argument('--delete', type=parse_bool, default=False, help='image deletion flag')
     args = parser.parse_args()
 
-    cleanjson(args.inputs, args.delete)
+    cleanjson(args.inputs)

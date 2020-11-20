@@ -74,7 +74,7 @@ def nvidia_baseline(num_outputs):
 
     model = Model(inputs=[img_in], outputs=outputs)
     # opt = Adadelta(learning_rate=0.001, rho=0.95, epsilon=1e-07, name="Adadelta")
-    opt = Adam(lr=0.0001)
+    opt = Adam(lr=conf.learning_rate)
     model.compile(optimizer=opt, loss="mse", metrics=['acc'])
 
     # add weight decay

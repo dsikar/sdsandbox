@@ -226,7 +226,7 @@ def go(model_name, outdir, epochs=50, inputs='./log/*.jpg', limit=None):
         # keras.callbacks.ModelCheckpoint(('model-{epoch:03d}' +'_' + model_name), monitor='val_loss', save_best_only=True, verbose=0),
     ]
     
-    batch_size = conf.training_batch_size
+    batch_size = conf.batch_size
 
 
     #Train on session images
@@ -242,7 +242,14 @@ def go(model_name, outdir, epochs=50, inputs='./log/*.jpg', limit=None):
     print("steps_per_epoch", steps_per_epoch, "validation_steps", validation_steps)
     s1 = strftime("%Y%m%d%H%M%S")
     try:
-        history = model.fit_generator(train_generator,
+        #history = model.fit_generator(train_generator,
+        #    steps_per_epoch = steps_per_epoch,
+        #    validation_data = validation_generator,
+        #    validation_steps = validation_steps,
+        #    epochs=epochs,
+        #    verbose=1,
+        #    callbacks=callbacks)
+        history = model.fit(train_generator,
             steps_per_epoch = steps_per_epoch,
             validation_data = validation_generator,
             validation_steps = validation_steps,

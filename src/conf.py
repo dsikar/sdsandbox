@@ -2,13 +2,13 @@ import math
 
 training_patience = 6
 
-training_batch_size = 64 # as per camber working runs
-
 training_default_epochs = 100
 
 training_default_aug_mult = 1
 
 training_default_aug_percent = 0.0
+
+learning_rate = 0.00001 # 0.00001
 
 # default model name
 model_name = 'nvidia1'
@@ -42,7 +42,7 @@ num_outputs = 2
 
 throttle_out_scale = 1.0
 # alexnet
-batch_size = 128 # nvidia1 = 64
+batch_size = 64
 
 # Using class members to avoid passing same parameters through various functions
 # The original NVIDIA paper mentions augmentation but no cropping i.e. road only

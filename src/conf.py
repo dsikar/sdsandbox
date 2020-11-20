@@ -50,5 +50,7 @@ batch_size = 64
 aug = False
 # pre-process image: crop, resize and rgb2yuv
 preproc = False
+# image normalization constant, Unity model maximum steer
+norm_const = 25
 
 

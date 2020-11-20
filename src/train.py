@@ -286,7 +286,7 @@ if __name__ == "__main__":
     parser.add_argument('--model', type=str, help='model name')
     parser.add_argument('--outdir', type=str, help='output directory')
     parser.add_argument('--epochs', type=int, default=conf.training_default_epochs, help='number of epochs')
-    parser.add_argument('--inputs', default='../dataset/unity/jungle1/log/*.jpg', help='input mask to gather images')
+    parser.add_argument('--inputs', default='../dataset/unity/log/*.jpg', help='input mask to gather images')
     parser.add_argument('--limit', type=int, default=None, help='max number of images to train with')
     args = parser.parse_args()
     #print(tf.__version__) 2.2.0

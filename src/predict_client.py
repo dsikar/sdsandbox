@@ -39,7 +39,32 @@ if tf.__version__ == '1.13.1':
     session = Session(config=config)
     keras.backend.set_session(session)
 
+# need to import file TODO
+import Automold as am
+import Helpers as hp
+import numpy as np
+# helper function for prediction
+def add_rain(image_arr, rt=None, st=0):
+    """
+    Add rain to image
+    Inputs:
+        image_arr: numpy array containing image
+        rt: string, rain type "heavy" or "torrential"
+        st: range to draw a random slant from
+    Output
+        image_arr: numpy array containing image with rain
+    """
+    if(st != 0):
+        # draw a random number for slant
+        st = np.random.randint(-1 * st, st)
+    image
+    if(rt!=None):
+        image_arr = am.add_rain_single(image_arr, rain_type=rt, slant=st)
+    else:
+         # no slant
+        image_arr = am.add_rain_single(image_arr)
 
+    return image_arr
 
 class DonkeySimMsgHandler(IMesgHandler):
 
@@ -92,8 +117,12 @@ class DonkeySimMsgHandler(IMesgHandler):
         imgString = data["image"]
         image = Image.open(BytesIO(base64.b64decode(imgString)))
         img_arr = np.asarray(image, dtype=np.float32)
+        # if(rain)
+        #    img_arr = add_rain(img_arr, rain)
+
         # same preprocessing as for training
         img_arr = preprocess(img_arr)
+        # if we are testing the network with rain
         self.img_arr = img_arr.reshape((1,) + img_arr.shape)
 
         if self.image_cb is not None:

@@ -323,7 +323,7 @@ if __name__ == "__main__":
     parser.add_argument('--model', type=str, help='model name')
     parser.add_argument('--outdir', type=str, help='output directory')
     parser.add_argument('--epochs', type=int, default=conf.training_default_epochs, help='number of epochs')
-    parser.add_argument('--inputs', default='../dataset/unity/genRoad/log/*.jpg', help='input mask to gather images')
+    parser.add_argument('--inputs', default='../dataset/unity/genRoad/*.jpg', help='input mask to gather images')
     parser.add_argument('--limit', type=int, default=None, help='max number of images to train with')
     parser.add_argument('--aug', type=parse_bool, default=False, help='image augmentation flag')
     parser.add_argument('--preproc', type=parse_bool, default=False, help='image preprocessing flag')

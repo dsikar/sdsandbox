@@ -44,6 +44,7 @@ import Automold as am
 import Helpers as hp
 import numpy as np
 # helper function for prediction
+
 def add_rain(image_arr, rt=None, st=0):
     """
     Add rain to image
@@ -54,11 +55,12 @@ def add_rain(image_arr, rt=None, st=0):
     Output
         image_arr: numpy array containing image with rain
     """
+    # print("Adding rain...")
     if(st != 0):
         # draw a random number for slant
         st = np.random.randint(-1 * st, st)
-    image
-    if(rt!=None):
+
+    if(rt!='light'): # heavy or torrential
         image_arr = am.add_rain_single(image_arr, rain_type=rt, slant=st)
     else:
          # no slant
@@ -122,6 +124,9 @@ class DonkeySimMsgHandler(IMesgHandler):
 
         # same preprocessing as for training
         img_arr = preprocess(img_arr)
+        # check for rain
+        if(conf.rt != ''):
+            img_arr = add_rain(img_arr, conf.rt, conf.st)
         # if we are testing the network with rain
         self.img_arr = img_arr.reshape((1,) + img_arr.shape)
 
@@ -233,7 +238,17 @@ if __name__ == "__main__":
     parser.add_argument('--num_cars', type=int, default=1, help='how many cars to spawn')
     parser.add_argument('--constant_throttle', type=float, default=0.0, help='apply constant throttle')
     parser.add_argument('--rand_seed', type=int, default=0, help='set road generation random seed')
+    parser.add_argument('--rain', type=str, default='', help='type of rain [light|heavy|torrential')
+    parser.add_argument('--slant', type=int, default=0, help='Rain slant deviation')
+
     args = parser.parse_args()
 
     address = (args.host, args.port)
+
+    conf.rt = args.rain
+    conf.st = args.slant
+
     go(args.model, address, args.constant_throttle, num_cars=args.num_cars, rand_seed=args.rand_seed)
+    # max value for slant is 20
+    # Example
+    # python3 predict_client.py --model=../trained_models/sanity/20201120171015_sanity.h5 --rain=light --slant=0

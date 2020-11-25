@@ -53,4 +53,7 @@ preproc = False
 # image normalization constant, Unity model maximum steer
 norm_const = 25
 
+# rain type and slant
+rt = ''
+st = 0
 

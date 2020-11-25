@@ -1,7 +1,7 @@
 # Predict steering angles for a dataset for which a ground truth exists
 # dsikar@gmail.com
 
-rom __future__ import print_function
+from __future__ import print_function
 
 import argparse
 import fnmatch
@@ -36,7 +36,7 @@ from tensorflow.python.keras.models import load_model
 
 inputs = "../dataset/unity/genRoad/.."
 
-def predict_drive(inputs, modelpath):
+def predict_drive(datapath, modelpath):
 
     print("loading model", modelpath)
     model = load_model(modelpath)
@@ -67,7 +67,17 @@ def predict_drive(inputs, modelpath):
     # save graph.
     # done
 
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser(description='prediction server')
+    parser.add_argument('--datapath', type=str, default='/home/simbox/git/msc-data/unity/genTrackOneLap', help='model filename')
+    parser.add_argument('--modelpath', type=str, default='127.0.0.1', help='server sim host')
 
+    args = parser.parse_args()
+
+    predict_drive(args.model, address, args.constant_throttle, num_cars=args.num_cars, rand_seed=args.rand_seed)
+    # max value for slant is 20
+    # Example
+    # python3 predict_client.py --model=../trained_models/sanity/20201120171015_sanity.h5 --rain=light --slant=0
 
 
 

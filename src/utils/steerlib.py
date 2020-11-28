@@ -168,7 +168,7 @@ def plotSteeringAngles(p, g=None, n=1, save=False, track= "Track Name", mname="m
 
     plt.plot(p*n, label="predicted")
     try:
-        if (g.all() != None):
+        if (g is not None):
             plt.plot(g*n, label="ground truth")
     except Exception as e:
         print("problems plotting: " + str(e))
@@ -191,7 +191,66 @@ def plotSteeringAngles(p, g=None, n=1, save=False, track= "Track Name", mname="m
     # if need be
     return plt
 
-#sa = GetSteeringFromtcpflow('../dataset/unity/genRoad/tcpflow/20201120184912_sanity.log')
+
+def getSteeringFromtcpflow(filename):
+    """
+    Get a tcpflow log and extract steering values obtained from network communication between.
+    Note, we only plot the predicted steering angle jsondict['steering']
+    and the value of jsondict['steering_angle'] is ignored. Assumed to be the steering angle
+    calculated by PID given the current course.
+    sim and prediction engine (predict_client.py)
+    Inputs
+        filename: string, name of tcpflow log
+    Returns
+        sa: list of arrays, steering angle predicton and actual value tuple.
+    Example
+
+
+    """
+    # open file
+    sa = []
+    # initialize prediction
+    pred = ''
+    f = open(filename, "r")
+    file = f.read()
+    try:
+        # readline = f.read()
+        lines = file.splitlines()
+        for line in lines:
+            # print(line)
+            start = line.find('{')
+            if (start == -1):
+                continue
+            jsonstr = line[start:]
+            # print(jsonstr)
+            jsondict = json.loads(jsonstr)
+            if "steering" in jsondict:
+                # predicted
+                pred = jsondict['steering']
+                # jsondict['steering_angle']
+                # sa.append([float(pred), act])
+                sa.append([float(pred), float(pred)])  # append twice to keep code from breaking
+            # if "steering_angle" in jsondict:
+            # actual
+            #   act = jsondict['steering_angle']
+            # save pair, only keep last pred in case two were send as it does happen i.e.:
+            # 127.000.000.001.59460-127.000.000.001.09091: {"msg_type": "control", "steering": "-0.071960375", "throttle": "0.08249988406896591", "brake": "0.0"}
+            # 127.000.000.001.59460-127.000.000.001.09091: {"msg_type": "control", "steering": "-0.079734944", "throttle": "0.08631626516580582", "brake": "0.0"}
+            # 127.000.000.001.09091-127.000.000.001.59460: {"msg_type":"telemetry","steering_angle":-0.07196037,(...)
+            #   if(len(pred) > 0):
+            #      sa.append([float(pred), act])
+            #      pred = '' # need to save this image
+            # deal with image later, sort out plot first
+            # imgString = jsondict["image"]
+            # image = Image.open(BytesIO(base64.b64decode(imgString)))
+            # img_arr = np.asarray(image, dtype=np.float32)
+    except Exception as e:
+        print("Exception raise: " + str(e))
+    # file should be automatically closed but will close for good measure
+    f.close()
+    return sa
+
+#sa = GetSteeringFromtcpflow('../../dataset/unity/genRoad/tcpflow/20201120184912_sanity.log')
 #sarr = np.asarray(sa)
 #p = sarr[:,0]
 #g = sarr[:,1]
@@ -209,3 +268,4 @@ if __name__ == "__main__":
     path = 'record_11640.json'
     js = load_json(path)
     print(js)
+    # plotSteeringAngles(p, None, 25, True, "Generated Track", "20201120171015_sanity.h5", 'tcpflow log predicted')

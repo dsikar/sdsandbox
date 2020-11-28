@@ -11,19 +11,23 @@ from augmentation import preprocess
 import cv2
 import conf
 
-def MakeVideo(filename, model):
+def MakeVideo(filename, model, preproc=False):
     """
     Make video from tcpflow logged images.
     video.avi is written to disk
     Inputs
         filename: string, name of tcpflow log
         model: name of model to stamp onto video
+        preproc: boolean, show preprocessed image next to original
     Output
         none
     """
     # video name
-    video_name = 'video.avi'
+    video_name = model + '.avi'
     VIDEO_WIDTH, VIDEO_HEIGHT = 800, 600
+    IMAGE_WIDTH, IMAGE_HEIGHT = 800, 600
+    if(preproc == True): # wide angle
+        VIDEO_WIDTH = IMAGE_WIDTH*2
     video = cv2.VideoWriter(video_name, 0, 11, (VIDEO_WIDTH, VIDEO_HEIGHT)) # assumed 11fps
     # font
     font = cv2.FONT_HERSHEY_SIMPLEX
@@ -66,17 +70,28 @@ def MakeVideo(filename, model):
                     # save
                     image.save('frame.jpg')
                     # reopen with user-friendlier cv2
-                    image = cv2.imread('frame.jpg')
+                    image = cv2.imread('frame.jpg') # 120x169=0x3
+                    # create a preprocessed copy to compare what simulator generates to what network "sees"
+                    # deal with image2 before changing image
+                    if (preproc == True):  # wide angle
+                        image2 = preprocess(image)
+                        image2 = cv2.resize(image2, (IMAGE_WIDTH, IMAGE_HEIGHT), cv2.INTER_AREA)
+                        cv2.putText(image2, 'Network Image', (50, 50), font, 1, (255, 255, 255), 2, cv2.LINE_AA)
                     # resize so we can write some info onto image
-                    image = cv2.resize(image, (VIDEO_WIDTH, VIDEO_HEIGHT), cv2.INTER_AREA)
-                    # model name
-                    # model
+                    image = cv2.resize(image, (IMAGE_WIDTH, IMAGE_HEIGHT), cv2.INTER_AREA)
+                    # add Info to frame
                     cv2.putText(image, model, (50, 50), font, 1, (255, 255, 255), 2, cv2.LINE_AA)
                     # Predicted steering angle
                     pst = sa[len(sa)-1][0]
                     pst *= conf.norm_const
                     simst = "Predicted steering angle: {:.2f}".format(pst)
                     cv2.putText(image, simst, (50, 115), font, 1, (255, 255, 255), 2, cv2.LINE_AA)
+                    # concatenate
+                    if (preproc == True):  # wide angle
+                        cimgs = np.concatenate((image, image2), axis=1)
+                        image = cimgs
+                    # model name
+                    # model
                     video.write(image);
                     pred = ''
     except Exception as e:
@@ -88,8 +103,10 @@ def MakeVideo(filename, model):
 
     return "DummyName.mp4"
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description='train script')
+    parser = argparse.ArgumentParser(description='Make Video script')
     parser.add_argument('--filename', type=str, help='tcpflow log')
     parser.add_argument('--model', type=str, help='model name for video label')
     args = parser.parse_args()
-    MakeVideo(args.filename, args.model)
+    MakeVideo(args.filename, args.model, True)
+    # example
+    # python MakeVideo.py --filename=/tmp/tcpflow.log --model=20201120184912_sanity.h5

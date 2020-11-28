@@ -130,11 +130,12 @@ def generator(samples, is_training, batch_size=64):
             yield X_train, y_train
 
 
-def get_files(filemask):
+def get_files(filemask, s=False):
     '''
     Use a filemask and search a path recursively for matches
     Inputs
         filemask: string passed as command line option, must not be enclosed in quotes
+        s: boolean, sort by create date flag
     '''
 
     filemask = os.path.expanduser(filemask)
@@ -144,6 +145,8 @@ def get_files(filemask):
     for root, dirnames, filenames in os.walk(path):
         for filename in fnmatch.filter(filenames, mask):
             matches.append(os.path.join(root, filename))
+    if(s == True):
+        matches = sorted(matches, key=os.path.getmtime)
     return matches
 
 

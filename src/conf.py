@@ -11,7 +11,7 @@ training_default_aug_percent = 0.0
 learning_rate = 0.00001 # 0.00001
 
 # default model name
-model_name = 'nvidia1'
+# model_name = 'nvidia1'
 #nvidia 1 - use this size for both
 #nvidia 1 and 2, just change nvidia size before
 # presenting to neural network
@@ -56,4 +56,3 @@ norm_const = 25
 # rain type and slant
 rt = ''
 st = 0
-

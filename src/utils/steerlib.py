@@ -148,6 +148,55 @@ def gos(p, g, n):
     assert len(p) == len(g), "Arrays must be of equal length"
     return sum(abs(p - g)) / len(p) * n
     # print("Goodness of steer: {:.2f}".format(steer))
+    
+def plotSteeringAngles(p, g=None, n=1, save=False, track= "Track Name", mname="model name", title='title'):
+    """
+    Plot predicted and (TODO) optionally ground truth steering angles
+    Inputs
+        p, g: prediction and ground truth float arrays
+        n: float, steering normalization constant
+        save: boolean, save plot flag
+        track, mname, title: string, track (data), trained model and title strings for plot
+    Outputs
+        plt: pyplot, plot
+    Example
+    # set argument variables (see data_predict.py)
+    plotSteeringAngles(p, g, nc, True, datapath[-2], modelpath[-1], 'Gs ' + gss)
+    """
+
+    plt.rcParams["figure.figsize"] = (18,3)
+
+    plt.plot(p*n, label="predicted")
+    try:
+        if (g.all() != None):
+            plt.plot(g*n, label="ground truth")
+    except Exception as e:
+        print("problems plotting: " + str(e))
+
+    plt.ylabel('Steering angle')
+    # Set a title of the current axes.
+    # plt.title('tcpflow log predicted steering angles: track ' + track + ' model ' + mname)
+    plt.title(title + ' Steering angles: track ' + track + ', model ' + mname)
+    # show a legend on the plot
+    plt.legend()
+    # Display a figure.
+    # horizontal grid only
+    plt.grid(axis='y')
+    # set limit
+    plt.xlim([-5,len(p)+5])
+    plt.gca().invert_yaxis()
+    # plt.show()
+    if(save==True):
+        plt.savefig('sa_' + track + '_' + mname + '.png')
+    # if need be
+    return plt
+
+#sa = GetSteeringFromtcpflow('../dataset/unity/genRoad/tcpflow/20201120184912_sanity.log')
+#sarr = np.asarray(sa)
+#p = sarr[:,0]
+#g = sarr[:,1]
+
+
 
 if __name__ == "__main__":
     # plot_hist("/home/simbox/git/sdsandbox/trained_models/nvidia1/20201107144927_nvidia1.history")

@@ -10,6 +10,7 @@ import matplotlib.pyplot as plt
 from augmentation import preprocess
 import cv2
 import conf
+# import debug.RecordVideo as RecordVideo
 
 def MakeVideo(filename, model, preproc=False):
     """
@@ -31,6 +32,7 @@ def MakeVideo(filename, model, preproc=False):
     video = cv2.VideoWriter(video_name, 0, 11, (VIDEO_WIDTH, VIDEO_HEIGHT)) # assumed 11fps
     # font
     font = cv2.FONT_HERSHEY_SIMPLEX
+
     # normalization constant
     # open file
     sa = []
@@ -67,16 +69,15 @@ def MakeVideo(filename, model, preproc=False):
                     imgString = jsondict["image"]
                     # decode string
                     image = Image.open(BytesIO(base64.b64decode(imgString)))
+                    # try to convert to jpg
+                    image = np.array(image)
+
                     # save
-                    image.save('frame.jpg')
+                    #image.save('frame.jpg')
                     # reopen with user-friendlier cv2
-                    image = cv2.imread('frame.jpg') # 120x169=0x3
-                    # create a preprocessed copy to compare what simulator generates to what network "sees"
-                    # deal with image2 before changing image
-                    if (preproc == True):  # wide angle
-                        image2 = preprocess(image)
-                        image2 = cv2.resize(image2, (IMAGE_WIDTH, IMAGE_HEIGHT), cv2.INTER_AREA)
-                        cv2.putText(image2, 'Network Image', (50, 50), font, 1, (255, 255, 255), 2, cv2.LINE_AA)
+                    #image = cv2.imread('frame.jpg') # 120x160x3
+
+                    image_copy = image
                     # resize so we can write some info onto image
                     image = cv2.resize(image, (IMAGE_WIDTH, IMAGE_HEIGHT), cv2.INTER_AREA)
                     # add Info to frame
@@ -86,6 +87,11 @@ def MakeVideo(filename, model, preproc=False):
                     pst *= conf.norm_const
                     simst = "Predicted steering angle: {:.2f}".format(pst)
                     cv2.putText(image, simst, (50, 115), font, 1, (255, 255, 255), 2, cv2.LINE_AA)
+                    # create a preprocessed copy to compare what simulator generates to what network "sees"
+                    if (preproc == True):  # wide angle
+                        image2 = preprocess(image_copy)
+                        image2 = cv2.resize(image2, (IMAGE_WIDTH, IMAGE_HEIGHT), cv2.INTER_AREA)
+                        cv2.putText(image2, 'Network Image', (50, 50), font, 1, (255, 255, 255), 2, cv2.LINE_AA)
                     # concatenate
                     if (preproc == True):  # wide angle
                         cimgs = np.concatenate((image, image2), axis=1)
@@ -100,6 +106,7 @@ def MakeVideo(filename, model, preproc=False):
     f.close()
     cv2.destroyAllWindows()
     video.release()
+
 
     return "DummyName.mp4"
 if __name__ == "__main__":

@@ -70,13 +70,11 @@ def MakeVideo(filename, model, preproc=False):
                     # decode string
                     image = Image.open(BytesIO(base64.b64decode(imgString)))
                     # try to convert to jpg
-                    image = np.array(image)
-
+                    #image = np.array(image) # sky colour turns orange (TODO investigate)
                     # save
-                    #image.save('frame.jpg')
+                    image.save('frame.jpg')
                     # reopen with user-friendlier cv2
-                    #image = cv2.imread('frame.jpg') # 120x160x3
-
+                    image = cv2.imread('frame.jpg') # 120x160x3
                     image_copy = image
                     # resize so we can write some info onto image
                     image = cv2.resize(image, (IMAGE_WIDTH, IMAGE_HEIGHT), cv2.INTER_AREA)

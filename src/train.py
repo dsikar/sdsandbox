@@ -20,7 +20,7 @@ from tensorflow import keras
 import tensorflow as tf
 import conf
 import models
-from helper_functions import hf_mkdir
+from helper_functions import hf_mkdir, parse_bool
 from augmentation import augment, preprocess
 import cv2
 
@@ -318,8 +318,9 @@ def go(model_name, outdir, epochs=50, inputs='./log/*.jpg', limit=None):
     except Exception as e:
         print("Failed to save accuracy/loss graph: " + str(e))
 
-def parse_bool(b):
-    return b == "True"
+# moved to helper functions
+#def parse_bool(b):
+#    return b == "True"
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='train script')

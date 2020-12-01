@@ -13,7 +13,7 @@ import json
 import base64
 import datetime
 from io import BytesIO
-
+import signal
 import tensorflow as tf
 from tensorflow.python import keras
 from tensorflow.python.keras.models import load_model
@@ -26,6 +26,8 @@ from gym_donkeycar.core.sim_client import SimClient
 from augmentation import augment, preprocess
 import conf
 import models
+from helper_functions import parse_bool
+import utils.RecordVideo as RecordVideo
 
 
 
@@ -87,7 +89,11 @@ class DonkeySimMsgHandler(IMesgHandler):
                     'car_loaded' : self.on_car_created,\
                     'on_disconnect' : self.on_disconnect,
                     'aborted' : self.on_aborted}
-
+        # images to record
+        self.img_orig = None
+        self.img_add_rain = None
+        self.img_processed = None
+        self.frame_count = 0
     def on_connect(self, client):
         self.client = client
         self.timer.reset()
@@ -119,14 +125,21 @@ class DonkeySimMsgHandler(IMesgHandler):
         imgString = data["image"]
         image = Image.open(BytesIO(base64.b64decode(imgString)))
         img_arr = np.asarray(image, dtype=np.float32)
-        # if(rain)
-        #    img_arr = add_rain(img_arr, rain)
+        self.frame_count += 1
+        self.img_orig = img_arr
 
         # same preprocessing as for training
         img_arr = preprocess(img_arr)
+        self.img_processed = img_arr
+
+        #if(conf.record == True):
+        #    text = (['Network Image', 'No Rain'])
+        #    rv.add_image(img_arr, text)
+
         # check for rain
         if(conf.rt != ''):
             img_arr = add_rain(img_arr, conf.rt, conf.st)
+
         # if we are testing the network with rain
         self.img_arr = img_arr.reshape((1,) + img_arr.shape)
 
@@ -140,6 +153,28 @@ class DonkeySimMsgHandler(IMesgHandler):
 
     def predict(self, image_array):
         outputs = self.model.predict(image_array)
+        # check if we are recording
+        if (conf.record == True):
+
+            # Add first image, with name of network and frame number
+            text = (['20201120171015_sanity.h5', 'Frame:  ' + str(self.frame_count)])
+            rv.add_image(self.img_orig, text)
+
+            # Add second image, preprocessed with rain or without
+            text = (['Network image', 'No rain'])
+            rv.add_image(self.img_processed, text)
+
+            # add third image with prediction
+            steering = outputs[0][0]
+            steering *= conf.norm_const
+            st_str = "{:.2f}".format(steering)
+            st_str = "Predicted steering angle: " + st_str
+            # st_str = "Predicted steering angle: 20"
+            rtype = 'Type: ' + conf.rt
+            s = 'Slant: -+' + str(conf.st)
+            text = (['Network image added rain', rtype, s, st_str])
+            rv.add_image(image_array[0], text)
+            rv.add_frame()
         self.parse_outputs(outputs)
 
 
@@ -229,6 +264,24 @@ def go(filename, address, constant_throttle=0, num_cars=1, image_cb=None, rand_s
             print('stopping')
             break
 
+def stop_exec(signum, frame):
+    # restore the original signal handler as otherwise evil things will happen
+    # in raw_input when CTRL+C is pressed, and our signal handler is not re-entrant
+    signal.signal(signal.SIGINT, original_sigint)
+
+    try:
+        # changed raw_input to input
+        if input("\nFinish recording video? (y/n)> ").lower().startswith('y'):
+            print("*** CTRL+C to stop ***")
+            rv.save_video()
+            sys.exit(1)
+
+    except KeyboardInterrupt:
+        print("Ok ok, quitting")
+        sys.exit(1)
+
+    # restore the exit gracefully handler here
+    signal.signal(signal.SIGINT, stop_exec)
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='prediction server')
@@ -240,13 +293,22 @@ if __name__ == "__main__":
     parser.add_argument('--rand_seed', type=int, default=0, help='set road generation random seed')
     parser.add_argument('--rain', type=str, default='', help='type of rain [light|heavy|torrential')
     parser.add_argument('--slant', type=int, default=0, help='Rain slant deviation')
+    parser.add_argument('--record', type=parse_bool, default="False", help='Record video of raw and processed images')
+    parser.add_argument('--img_cnt', type=int, default=3, help='Number of side by side images to record')
+
 
     args = parser.parse_args()
-
     address = (args.host, args.port)
 
     conf.rt = args.rain
     conf.st = args.slant
+    conf.record = args.record
+
+    if(conf.record == True):
+        print("*** When finished, press CTRL+C and y to finish recording, the CTRL+C to quit ***")
+        original_sigint = signal.getsignal(signal.SIGINT)
+        signal.signal(signal.SIGINT, stop_exec)
+        rv = RecordVideo.RecordVideo(args.model, "video", args.img_cnt)
 
     go(args.model, address, args.constant_throttle, num_cars=args.num_cars, rand_seed=args.rand_seed)
     # max value for slant is 20

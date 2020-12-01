@@ -56,3 +56,8 @@ norm_const = 25
 # rain type and slant
 rt = ''
 st = 0
+
+# video recording
+VIDEO_WIDTH, VIDEO_HEIGHT = 800, 600
+IMAGE_STILL_WIDTH, IMAGE_STILL_HEIGHT = 800, 600
+record = False

@@ -143,7 +143,6 @@ class DonkeySimMsgHandler(IMesgHandler):
 
         # if we are testing the network with rain
         self.img_arr = img_arr.reshape((1,) + img_arr.shape)
-        print(self.img_arr.shape)
 
         if self.image_cb is not None:
             self.image_cb(img_arr, self.steering_angle )

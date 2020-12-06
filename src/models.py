@@ -96,11 +96,10 @@ def nvidia_model1(num_outputs):
     '''
     # row, col, ch = conf.row, conf.col, conf.ch
     # better albeit less readable
-    row, col, ch = conf.nvidia1_img_dims[conf.IMG_WIDTH_IDX], conf.nvidia1_img_dims[conf.IMG_HEIGHT_IDX], conf.nvidia1_img_dims[conf.IMG_DEPTH_IDX]
+    row, col, ch = conf.nvidia1_img_dims[conf.IMG_HEIGHT_IDX], conf.nvidia1_img_dims[conf.IMG_WIDTH_IDX], conf.nvidia1_img_dims[conf.IMG_DEPTH_IDX]
     drop = 0.1
     
-    # img_in = Input(shape=(row, col, ch), name='img_in')
-    img_in = Input(shape=(col, row, ch), name='img_in') # using Naoki's scheme - https://github.com/naokishibuya/car-behavioral-cloning/blob/master/utils.py
+    img_in = Input(shape=(row, col, ch), name='img_in')
     x = img_in
     # x = Cropping2D(cropping=((10,0), (0,0)))(x) #trim 10 pixels off top
     # x = Lambda(lambda x: x/127.5 - 1.)(x) # normalize and re-center
@@ -137,7 +136,9 @@ def nvidia_model2(num_outputs):
     '''
     This model expects images of size 66,200,3
     '''
-    row, col, ch = conf.row, conf.col, conf.ch
+    # row, col, ch = conf.row, conf.col, conf.ch
+    row, col, ch = conf.nvidia2_img_dims[conf.IMG_HEIGHT_IDX], conf.nvidia2_img_dims[conf.IMG_WIDTH_IDX], \
+                   conf.nvidia2_img_dims[conf.IMG_DEPTH_IDX]
 
     drop = 0.5
 

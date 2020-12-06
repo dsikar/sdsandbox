@@ -3,6 +3,7 @@ import cv2
 import conf
 import numpy as np
 
+
 class RecordVideo():
     """
     Record video class, used to record videos from tcpflow log or still images
@@ -20,22 +21,23 @@ class RecordVideo():
         self.modelname = model[-1]
         videoname = videoname + '.avi'
         self.img_cnt = img_cnt
-        self.VIDEO_WIDTH, self.VIDEO_HEIGHT = conf.VIDEO_WIDTH, conf.VIDEO_HEIGHT # 800, 600
+        self.VIDEO_WIDTH, self.VIDEO_HEIGHT = conf.VIDEO_WIDTH, conf.VIDEO_HEIGHT  # 800, 600
         self.IMAGE_WIDTH, self.IMAGE_HEIGHT = conf.IMAGE_STILL_WIDTH, conf.IMAGE_STILL_HEIGHT
         self.VIDEO_WIDTH = self.IMAGE_WIDTH * img_cnt
-        self.video = cv2.VideoWriter(videoname, 0, 11, (self.VIDEO_WIDTH, self.VIDEO_HEIGHT))  # assumed 11fps approximately
+        self.video = cv2.VideoWriter(videoname, 0, 11,
+                                     (self.VIDEO_WIDTH, self.VIDEO_HEIGHT))  # assumed 11fps approximately
         self.font = cv2.FONT_HERSHEY_SIMPLEX
         # video line spacing
         self.images = []
 
     def add_image(self, image, text):
         # self.img_arr_1 =
-        #cv2.putText(image, model, (50, 50), font, 1, (255, 255, 255), 2, cv2.LINE_AA)
+        # cv2.putText(image, model, (50, 50), font, 1, (255, 255, 255), 2, cv2.LINE_AA)
         # Predicted steering angle
-        #pst = sa[len(sa) - 1][0]
-        #pst *= conf.norm_const
-        #simst = "Predicted steering angle: {:.2f}".format(pst)
-        #cv2.putText(image, simst, (50, 115), font, 1, (255, 255, 255), 2, cv2.LINE_AA)
+        # pst = sa[len(sa) - 1][0]
+        # pst *= conf.norm_const
+        # simst = "Predicted steering angle: {:.2f}".format(pst)
+        # cv2.putText(image, simst, (50, 115), font, 1, (255, 255, 255), 2, cv2.LINE_AA)
         self.images.append([image, text])
 
     def add_frame(self):
@@ -64,7 +66,7 @@ class RecordVideo():
             output_image = np.concatenate((output_image, self.images[i][0]), axis=1)
         # append
         try:
-            self.video.write(np.uint8(output_image)) # catch error Assertion failed) image.depth() == CV_8U
+            self.video.write(np.uint8(output_image))  # catch error Assertion failed) image.depth() == CV_8U
         except Exception as e:
             print("Exception raise: " + str(e))
         # blank images

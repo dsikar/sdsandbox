@@ -304,7 +304,7 @@ if __name__ == "__main__":
     conf.st = args.slant
     conf.record = args.record
 
-    if(conf.record == True):
+    if conf.record == True:
         print("*** When finished, press CTRL+C and y to finish recording, the CTRL+C to quit ***")
         original_sigint = signal.getsignal(signal.SIGINT)
         signal.signal(signal.SIGINT, stop_exec)

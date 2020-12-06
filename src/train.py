@@ -17,12 +17,13 @@ from time import strftime
 import numpy as np
 from PIL import Image
 from tensorflow import keras
-import tensorflow as tf
+# import tensorflow as tf
 import conf
 import models
 from helper_functions import hf_mkdir, parse_bool
 from augmentation import augment, preprocess
-import cv2
+# import cv2
+import Augmentation
 
 '''
 matplotlib can be a pain to setup. So handle the case where it is absent. When present,
@@ -96,15 +97,19 @@ def generator(samples, is_training, batch_size=64):
 
                     #PIL Image as a numpy array
                     image = np.array(image, dtype=np.float32)
+                    image_cp = image
                     # resize for nvidia
                     # nvidia 2
                     # image = cv2.resize(image, (200, 66), cv2.INTER_AREA)
                     # augmentation only for training
                     if(conf.aug):
                         if is_training and np.random.rand() < 0.6:
-                            image, steering = augment(image, steering)
+                            image, steering = ag.augment(image, steering)
+
                     if (conf.preproc):
-                        image = preprocess(image)
+                        image = ag.preprocess(image) # preprocess(image)
+                    # assert (preprocess(image)==ag.preprocess(image))
+
                     # for nvidia2 model
                     # 224 224 Alexnet
                     # image = cv2.resize(image, (224, 224), cv2.INTER_AREA)
@@ -216,6 +221,15 @@ def go(model_name, outdir, epochs=50, inputs='./log/*.jpg', limit=None):
         model = models.nvidia_model2(conf.num_outputs)
     elif(conf.model_name == 'nvidia_baseline'):
         model = models.nvidia_baseline(conf.num_outputs)
+    elif(conf.model_name == 'alexnet'):
+        try:
+            model = models.get_alexnet(conf.num_outputs)
+        except Exception as e:
+            print("Failed to save accuracy/loss graph: " + str(e))
+        # adjust image size
+        # conf.row = conf.image_width_net = conf.image_width_alexnet
+        # conf.col = conf.image_height_net = conf.image_height_alexnet
+
     else:
         try:
             raise ValueError
@@ -244,14 +258,16 @@ def go(model_name, outdir, epochs=50, inputs='./log/*.jpg', limit=None):
 
     print("steps_per_epoch", steps_per_epoch, "validation_steps", validation_steps)
     s1 = strftime("%Y%m%d%H%M%S")
+
+    #history = model.fit_generator(train_generator,
+    #    steps_per_epoch = steps_per_epoch,
+    #    validation_data = validation_generator,
+    #    validation_steps = validation_steps,
+    #    epochs=epochs,
+    #    verbose=1,
+    #    callbacks=callbacks)
+    history = []
     try:
-        #history = model.fit_generator(train_generator,
-        #    steps_per_epoch = steps_per_epoch,
-        #    validation_data = validation_generator,
-        #    validation_steps = validation_steps,
-        #    epochs=epochs,
-        #    verbose=1,
-        #    callbacks=callbacks)
         history = model.fit(train_generator,
             steps_per_epoch = steps_per_epoch,
             validation_data = validation_generator,
@@ -260,7 +276,8 @@ def go(model_name, outdir, epochs=50, inputs='./log/*.jpg', limit=None):
             verbose=1,
             callbacks=callbacks)
     except Exception as e:
-        print("Failed fit generator: " + str(e))
+        print("Failed to run model: " + str(e))
+
     # e =  "Input to reshape is a tensor with 147456 values, but the requested shape requires a multiple of 27456". errpr rao with jungle1 dataset
     # 	 [[node model/flattened/Reshape (defined at /git/sdsandbox/src/train.py:250) ]] [Op:__inference_train_function_2398]
     #
@@ -338,6 +355,7 @@ if __name__ == "__main__":
     conf.preproc = args.preproc
     conf.model_name = args.model
     #print(tf.__version__) 2.2.0
+    ag = Augmentation.Augmentation(args.model)
     go(args.model, args.outdir, epochs=args.epochs, limit=args.limit, inputs=args.inputs)
 
 #python train.py ..\outputs\mymodel_aug_90_x4_e200 --epochs=200

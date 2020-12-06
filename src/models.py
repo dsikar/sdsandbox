@@ -94,8 +94,9 @@ def nvidia_model1(num_outputs):
     https://images.nvidia.com/content/tegra/automotive/images/2016/solutions/pdf/end-to-end-dl-using-px.pdf
     Activation is RELU
     '''
-    row, col, ch = conf.row, conf.col, conf.ch
-    
+    # row, col, ch = conf.row, conf.col, conf.ch
+    # better albeit less readable
+    row, col, ch = conf.nvidia1_img_dims[conf.IMG_WIDTH_IDX], conf.nvidia1_img_dims[conf.IMG_HEIGHT_IDX], conf.nvidia1_img_dims[conf.IMG_DEPTH_IDX]
     drop = 0.1
     
     img_in = Input(shape=(row, col, ch), name='img_in')
@@ -172,6 +173,47 @@ def nvidia_model2(num_outputs):
     model.compile(optimizer=opt, loss="mse", metrics=['acc'])
     return model
 
+def nvidia_model3(num_outputs):
+    '''
+    This model expects images of size 66,200,3
+    '''
+    row, col, ch = conf.row, conf.col, conf.ch
+
+    drop = 0.5
+
+    img_in = Input(shape=(row, col, ch), name='img_in')
+    x = img_in
+    # x = Cropping2D(cropping=((10,0), (0,0)))(x) #trim 10 pixels off top
+    x = Lambda(lambda x: x/127.5 - 1.0)(x) # normalize and re-center
+    # x = Lambda(lambda x: x / 255.0)(x)
+    x = Conv2D(24, (5, 5), strides=(2, 2), activation='elu', name="conv2d_1")(x)
+    # x = Dropout(drop)(x)
+    x = Conv2D(36, (5, 5), strides=(2, 2), activation='elu', name="conv2d_2")(x)
+    #x = Dropout(drop)(x)
+    x = Conv2D(64, (5, 5), strides=(2, 2), activation='elu', name="conv2d_3")(x)
+    #x = Dropout(drop)(x)
+    x = Conv2D(64, (3, 3), activation='elu', name="conv2d_4")(x) # default strides=(1,1)
+    #x = Dropout(drop)(x)
+    x = Conv2D(64, (3, 3), activation='elu', name="conv2d_5")(x)
+    x = Dropout(drop)(x)
+
+    x = Flatten(name='flattened')(x)
+
+    x = Dense(100, activation='elu')(x)
+    # x = Dropout(drop)(x)
+    x = Dense(50, activation='elu')(x)
+    # x = Dropout(drop)(x)
+    x = Dense(10, activation='elu')(x) # Added in Naoki's model
+
+    outputs = []
+    # outputs.append(Dense(num_outputs, activation='linear', name='steering_throttle')(x))
+    outputs.append(Dense(num_outputs, name='steering_throttle')(x))
+
+    model = Model(inputs=[img_in], outputs=outputs)
+    opt = Adam(lr=0.0001)
+    model.compile(optimizer=opt, loss="mse", metrics=['acc'])
+    return model
+
 def get_alexnet(num_outputs):
     '''
     this model is also inspired by the NVIDIA paper
@@ -195,7 +237,7 @@ def get_alexnet(num_outputs):
     NB Tawn Kramer's model uses dropout = 0.1 on five layers, Naoki uses
     0.5 on a single layer
     '''
-    row, col, ch = conf.row, conf.col, conf.ch
+    row, col, ch = conf.image_width_alexnet, conf.image_height_alexnet, conf.ch
 
     drop = 0.5
 
@@ -204,7 +246,36 @@ def get_alexnet(num_outputs):
     # x = Cropping2D(cropping=((10,0), (0,0)))(x) #trim 10 pixels off top
     x = Lambda(lambda x: x/127.5 - 1.0)(x) # normalize and re-center
     # x = Lambda(lambda x: x / 255.0)(x)
-    x = Conv2D(96, (11, 11), strides=(4, 4), activation='elu', name="conv2d_1")(x)
+    x = Conv2D(48, (8, 8), strides=(4, 4), padding='valid', activation='elu', name="conv2d_1")(x)
+    # x = Dropout(drop)(x)
+    x = MaxPooling2D(48, (1, 1), padding="same", name="maxpool2d_1")(x)
+
+    x = Conv2D(128, (3, 3), strides=(2, 2), padding='valid', activation='elu', name="conv2d_2")(x)
+    #x = Dropout(drop)(x)
+    x = MaxPooling2D(128, (1, 1), padding="same", name="maxpool2d_2")(x)
+
+    x = Conv2D(192, (3, 3), strides=(2, 2), padding='valid', activation='elu', name="conv2d_3")(x)
+    #x = Dropout(drop)(x)
+    x = Conv2D(192, (3, 3), strides=(1, 1), padding='same', activation='elu', name="conv2d_4")(x) # default strides=(1,1)
+    #x = Dropout(drop)(x)
+
+    x = Conv2D(128, (3, 3), strides=(1, 1), padding='same', activation='elu', name="conv2d_5")(x)
+
+    x = MaxPooling2D(128, (1, 1), padding="same", name="maxpool2d_3")(x)
+
+    x = Conv2D(64, (3, 3), activation='elu', name="conv2d_6")(x)
+    # error Negative dimension size caused by subtracting 128 from 10 for '{{node max_pooling2d/MaxPool}} = MaxPool[T=DT_FLOAT,
+    # data_format="NHWC", ksize=[1, 128, 128, 1], padding="VALID", strides=[1, 3, 3, 1]](conv2d_4/Identity)'
+    # with input shapes: [?,10,10,192].
+    # x = MaxPooling2D(128, (3, 3), padding="SAME")(x)
+    # By commenting out line above, error is:
+    #  Input to reshape is a tensor with 1843200 values, but the requested shape requires a multiple of 101568
+    # 	 [[node model/flattened/Reshape (defined at /git/sdsandbox/src/train.py:272) ]] [Op:__inference_train_function_1081]
+
+    x = Dropout(drop)(x)
+
+    """
+        x = Conv2D(24, (5, 5), strides=(2, 2), activation='elu', name="conv2d_1")(x)
     # x = Dropout(drop)(x)
     x = Conv2D(36, (5, 5), strides=(2, 2), activation='elu', name="conv2d_2")(x)
     #x = Dropout(drop)(x)
@@ -212,16 +283,27 @@ def get_alexnet(num_outputs):
     #x = Dropout(drop)(x)
     x = Conv2D(64, (3, 3), activation='elu', name="conv2d_4")(x) # default strides=(1,1)
     #x = Dropout(drop)(x)
-    x = Conv2D(64, (3, 3), activation='elu', name="conv2d_5")(x)
+    x = MaxPooling2D(64, (3, 3), name="maxpool2d_5")(x)
     x = Dropout(drop)(x)
 
     x = Flatten(name='flattened')(x)
 
-    x = Dense(100, activation='elu')(x)
+    x = Dense(2048, activation='elu')(x)
     # x = Dropout(drop)(x)
-    x = Dense(50, activation='elu')(x)
+    x = Dense(2048, activation='elu')(x)
     # x = Dropout(drop)(x)
-    x = Dense(10, activation='elu')(x) # Added in Naoki's model
+    # x = Dense(10, activation='elu')(x) # Added in Naoki's model
+    """
+
+    x = Flatten(name='flattened')(x) # error when followed by
+
+    x = Dense(100, name='Dense_1', activation='elu')(x)# 2048, 2048 ~  Input to reshape is a tensor with 442368 values, but the requested shape requires a multiple of 21632
+	 # [[node model/flattened/Reshape (defined at /git/sdsandbox/src/train.py:272) ]] [Op:__inference_train_function_1192]
+
+    # x = Dropout(drop)(x)
+    x = Dense(50, name='Dense_2', activation='elu')(x)
+    # x = Dropout(drop)(x)
+    # x = Dense(10, activation='elu')(x) # Added in Naoki's model
 
     outputs = []
     # outputs.append(Dense(num_outputs, activation='linear', name='steering_throttle')(x))

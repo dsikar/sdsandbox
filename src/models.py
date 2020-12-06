@@ -7,7 +7,7 @@ from __future__ import print_function
 from tensorflow.keras.models import Model
 from tensorflow.keras.layers import Conv2D, MaxPooling2D, Input
 from tensorflow.keras.layers import Dense, Lambda, ELU
-from tensorflow.keras.layers import Activation, Dropout, Flatten, Dense
+from tensorflow.keras.layers import Activation, Dropout, Flatten, Dense, BatchNormalization
 from tensorflow.keras.layers import Cropping2D
 from tensorflow.keras.optimizers import Adadelta, Adam, SGD
 from tensorflow.keras import initializers, regularizers

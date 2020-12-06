@@ -314,3 +314,4 @@ if __name__ == "__main__":
     # max value for slant is 20
     # Example
     # python3 predict_client.py --model=../trained_models/sanity/20201120171015_sanity.h5 --rain=light --slant=0
+

@@ -25,10 +25,9 @@ from gym_donkeycar.core.sim_client import SimClient
 # same preprocess as for training
 from augmentation import augment, preprocess
 import conf
-import models
 from helper_functions import parse_bool
 import utils.RecordVideo as RecordVideo
-
+import Augmentation
 
 
 if tf.__version__ == '1.13.1':
@@ -128,8 +127,10 @@ class DonkeySimMsgHandler(IMesgHandler):
         self.frame_count += 1
         self.img_orig = img_arr
 
+        # same image size expected by original network
+        img_arr = ag.resize_expected(img_arr)
         # same preprocessing as for training
-        img_arr = preprocess(img_arr)
+        img_arr = ag.preprocess(img_arr)
         self.img_processed = img_arr
 
         #if(conf.record == True):
@@ -142,6 +143,7 @@ class DonkeySimMsgHandler(IMesgHandler):
 
         # if we are testing the network with rain
         self.img_arr = img_arr.reshape((1,) + img_arr.shape)
+        print(self.img_arr.shape)
 
         if self.image_cb is not None:
             self.image_cb(img_arr, self.steering_angle )
@@ -286,6 +288,7 @@ def stop_exec(signum, frame):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='prediction server')
     parser.add_argument('--model', type=str, help='model filename')
+    parser.add_argument('--modelname', type=str, default='nvidia1', help='model filename')
     parser.add_argument('--host', type=str, default='127.0.0.1', help='server sim host')
     parser.add_argument('--port', type=int, default=9091, help='bind to port')
     parser.add_argument('--num_cars', type=int, default=1, help='how many cars to spawn')
@@ -303,6 +306,8 @@ if __name__ == "__main__":
     conf.rt = args.rain
     conf.st = args.slant
     conf.record = args.record
+
+    ag = Augmentation.Augmentation(args.modelname)
 
     if conf.record == True:
         print("*** When finished, press CTRL+C and y to finish recording, the CTRL+C to quit ***")

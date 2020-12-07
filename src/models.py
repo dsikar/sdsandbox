@@ -165,7 +165,7 @@ def nvidia_model2(num_outputs):
     # x = Dropout(drop)(x)
     x = Dense(50, activation='elu')(x)
     # x = Dropout(drop)(x)
-    # x = Dense(10, activation='elu')(x) # Added in Naoki's model
+    x = Dense(10, activation='elu')(x) # Added in Naoki's model
 
     outputs = []
     # outputs.append(Dense(num_outputs, activation='linear', name='steering_throttle')(x))

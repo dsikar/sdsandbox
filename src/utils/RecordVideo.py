@@ -9,17 +9,20 @@ class RecordVideo():
     Record video class, used to record videos from tcpflow log or still images
     """
 
-    def __init__(self, model, videoname, img_cnt):
+    def __init__(self, model, rt):
         """
         Record video while running predictions
         Inputs
             model: string, model name
-            videoname: string, name to save video as
-            img_cnt: number of images that will be added side by side
+            rt: type of rain
         """
         model = model.split('/')
         self.modelname = model[-1]
-        videoname = videoname + '.avi'
+        videoname = self.modelname + '.avi'
+        # 3 images side by side in the rain
+        img_cnt = 3
+        if(rt == ''): # 2 images in the dry
+            img_cnt = 2
         self.img_cnt = img_cnt
         self.VIDEO_WIDTH, self.VIDEO_HEIGHT = conf.VIDEO_WIDTH, conf.VIDEO_HEIGHT  # 800, 600
         self.IMAGE_WIDTH, self.IMAGE_HEIGHT = conf.IMAGE_STILL_WIDTH, conf.IMAGE_STILL_HEIGHT

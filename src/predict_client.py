@@ -93,6 +93,10 @@ class DonkeySimMsgHandler(IMesgHandler):
         self.img_add_rain = None
         self.img_processed = None
         self.frame_count = 0
+
+        # model name
+
+
     def on_connect(self, client):
         self.client = client
         self.timer.reset()
@@ -129,6 +133,12 @@ class DonkeySimMsgHandler(IMesgHandler):
 
         # set to same image size expected from acquisition process
         img_arr = ag.resize_expected(img_arr)
+
+        # check for rain
+        if(conf.rt != ''):
+            img_arr = add_rain(img_arr, conf.rt, conf.st)
+            self.img_add_rain = img_arr
+
         # same preprocessing as for training
         img_arr = ag.preprocess(img_arr)
         self.img_processed = img_arr
@@ -136,10 +146,6 @@ class DonkeySimMsgHandler(IMesgHandler):
         #if(conf.record == True):
         #    text = (['Network Image', 'No Rain'])
         #    rv.add_image(img_arr, text)
-
-        # check for rain
-        if(conf.rt != ''):
-            img_arr = add_rain(img_arr, conf.rt, conf.st)
 
         # if we are testing the network with rain
         self.img_arr = img_arr.reshape((1,) + img_arr.shape)
@@ -158,22 +164,30 @@ class DonkeySimMsgHandler(IMesgHandler):
         if (conf.record == True):
 
             # Add first image, with name of network and frame number
-            text = (['20201120171015_sanity.h5', 'Intensity Multiplie: 8', 'Frame:  ' + str(self.frame_count)])
+            # TODO, get network name from argument
+            text = ([rv.modelname, 'Intensity Multiplie: 1', 'Acquired image', 'Frame:  ' + str(self.frame_count)])
             rv.add_image(self.img_orig, text)
 
             # Add second image, preprocessed with rain or without
-            text = (['Network image', 'No rain'])
-            rv.add_image(self.img_processed, text)
+            # text = (['Network image', 'No rain'])
+            # rv.add_image(self.img_processed, text)
+            # if rain added
+            # check for rain
+            if (conf.rt != ''):
+                rtype = 'Type: ' + conf.rt
+                s = 'Slant: -+' + str(conf.st)
+                text = (['Added rain', rtype, s])
+                rv.add_image(self.img_add_rain, text)
 
-            # add third image with prediction
+                # add third image with prediction
             steering = outputs[0][0]
             steering *= conf.norm_const
             st_str = "{:.2f}".format(steering)
             st_str = "Predicted steering angle: " + st_str
             # st_str = "Predicted steering angle: 20"
-            rtype = 'Type: ' + conf.rt
-            s = 'Slant: -+' + str(conf.st)
-            text = (['Network image added rain', rtype, s, st_str])
+            #rtype = 'Type: ' + conf.rt
+            #s = 'Slant: -+' + str(conf.st)
+            text = (["Network image", st_str])
             rv.add_image(image_array[0], text)
             rv.add_frame()
         self.parse_outputs(outputs)
@@ -296,7 +310,7 @@ if __name__ == "__main__":
     parser.add_argument('--rain', type=str, default='', help='type of rain [light|heavy|torrential')
     parser.add_argument('--slant', type=int, default=0, help='Rain slant deviation')
     parser.add_argument('--record', type=parse_bool, default="False", help='Record video of raw and processed images')
-    parser.add_argument('--img_cnt', type=int, default=3, help='Number of side by side images to record')
+    # parser.add_argument('--img_cnt', type=int, default=3, help='Number of side by side images to record')
 
 
     args = parser.parse_args()
@@ -312,7 +326,7 @@ if __name__ == "__main__":
         print("*** When finished, press CTRL+C and y to finish recording, then CTRL+C to quit ***")
         original_sigint = signal.getsignal(signal.SIGINT)
         signal.signal(signal.SIGINT, stop_exec)
-        rv = RecordVideo.RecordVideo(args.model, "video", args.img_cnt)
+        rv = RecordVideo.RecordVideo(args.model, conf.rt)
 
     go(args.model, address, args.constant_throttle, num_cars=args.num_cars, rand_seed=args.rand_seed)
     # max value for slant is 20

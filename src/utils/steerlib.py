@@ -194,7 +194,7 @@ def plotSteeringAngles(p, g=None, n=1, save=False, track= "Track Name", mname="m
 
 def getSteeringFromtcpflow(filename):
     """
-    Get a tcpflow log and extract steering values obtained from network communication between.
+    Get a tcpflow log and extract steering values obtained from network communication between sim and predict_client.py.
     Note, we only plot the predicted steering angle jsondict['steering']
     and the value of jsondict['steering_angle'] is ignored. Assumed to be the steering angle
     calculated by PID given the current course.

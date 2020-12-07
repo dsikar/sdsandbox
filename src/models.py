@@ -157,7 +157,7 @@ def nvidia_model2(num_outputs):
     x = Conv2D(64, (3, 3), activation='elu', name="conv2d_4")(x) # default strides=(1,1)
     #x = Dropout(drop)(x)
     x = Conv2D(64, (3, 3), activation='elu', name="conv2d_5")(x)
-    x = Dropout(drop)(x)
+    # x = Dropout(drop)(x)
 
     x = Flatten(name='flattened')(x)
 

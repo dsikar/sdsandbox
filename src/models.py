@@ -141,7 +141,7 @@ def nvidia_model2(num_outputs):
     row, col, ch = conf.nvidia2_img_dims[conf.IMG_HEIGHT_NET_IDX], conf.nvidia2_img_dims[conf.IMG_WIDTH_NET_IDX], \
                    conf.nvidia2_img_dims[conf.IMG_DEPTH_IDX]
 
-    drop = 0.25
+    drop = 0.1
 
     img_in = Input(shape=(row, col, ch), name='img_in')
     x = img_in

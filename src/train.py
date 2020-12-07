@@ -97,7 +97,7 @@ def generator(samples, is_training, batch_size=64):
 
                     #PIL Image as a numpy array
                     image = np.array(image, dtype=np.float32)
-                    image_cp = image
+                    # image_cp = image
                     # resize for nvidia
                     # nvidia 2
                     # image = cv2.resize(image, (200, 66), cv2.INTER_AREA)
@@ -106,6 +106,7 @@ def generator(samples, is_training, batch_size=64):
                         if is_training and np.random.rand() < 0.6:
                             image, steering = ag.augment(image, steering)
 
+                    # This provides this actual size network is expecting, so must run
                     if (conf.preproc):
                         image = ag.preprocess(image) # preprocess(image)
                     # assert (preprocess(image)==ag.preprocess(image))
@@ -347,7 +348,7 @@ if __name__ == "__main__":
     parser.add_argument('--inputs', default='../dataset/unity/genRoad/*.jpg', help='input mask to gather images')
     parser.add_argument('--limit', type=int, default=None, help='max number of images to train with')
     parser.add_argument('--aug', type=parse_bool, default=False, help='image augmentation flag')
-    parser.add_argument('--preproc', type=parse_bool, default=False, help='image preprocessing flag')
+    parser.add_argument('--preproc', type=parse_bool, default=True, help='image preprocessing flag')
 
     args = parser.parse_args()
 

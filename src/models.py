@@ -116,10 +116,12 @@ def nvidia_model1(num_outputs):
     x = Dropout(drop)(x)
     
     x = Flatten(name='flattened')(x)
+    x = Dense(1064, activation='relu')(x)
     x = Dense(100, activation='relu')(x)
     #x = Dropout(drop)(x)
     x = Dense(50, activation='relu')(x)
     #x = Dropout(drop)(x)
+    x = Dense(10, activation='relu')(x)
 
     outputs = []
     outputs.append(Dense(num_outputs, activation='linear', name='steering_throttle')(x))

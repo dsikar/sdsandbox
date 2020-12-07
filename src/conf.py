@@ -45,7 +45,7 @@ NVIDIA2 = 'nvidia2' # a.k.a. NaokiNet
 nvidia2_img_dims = [320,160,3,200,66,81,-35]
 # NVIDIA_BASELINE
 NVIDIA_BASELINE = 'nvidia_baseline' # a.k.a. NaokiNet
-nvidia_baseline_img_dims = [160,120,3,160,120,60,-25] #[320,160,3,200,66,81,-35]
+nvidia_baseline_img_dims = [160,120,3,200,66,60,-25]
 
 # Alexnet
 image_width_alexnet = 224

@@ -51,9 +51,9 @@ def nvidia_baseline(num_outputs):
     x = Lambda(lambda x: x / 255.0)(x)
     x = Conv2D(24, (5, 5), strides=(2, 2), activation='relu', name="conv2d_1")(x)
     x = Dropout(drop)(x)
-    x = Conv2D(32, (5, 5), strides=(2, 2), activation='relu', name="conv2d_2")(x) #2nd
+    x = Conv2D(36, (5, 5), strides=(2, 2), activation='relu', name="conv2d_2")(x) #2nd
     x = Dropout(drop)(x)
-    x = Conv2D(64, (5, 5), strides=(2, 2), activation='relu', name="conv2d_3")(x)
+    x = Conv2D(48, (5, 5), strides=(2, 2), activation='relu', name="conv2d_3")(x)
     x = Dropout(drop)(x)
     x = Conv2D(64, (3, 3), strides=(1, 1), activation='relu', name="conv2d_4")(x) # default strides=(1,1) # 4th
     x = Dropout(drop)(x)
@@ -152,7 +152,7 @@ def nvidia_model2(num_outputs):
     # x = Lambda(lambda x: x / 255.0)(x)
     x = Conv2D(24, (5, 5), strides=(2, 2), activation='elu', name="conv2d_1")(x)
     #x = Dropout(drop)(x)
-    x = Conv2D(32, (5, 5), strides=(2, 2), activation='elu', name="conv2d_2")(x)
+    x = Conv2D(36, (5, 5), strides=(2, 2), activation='elu', name="conv2d_2")(x)
     #x = Dropout(drop)(x)
     x = Conv2D(48, (5, 5), strides=(2, 2), activation='elu', name="conv2d_3")(x)
     #x = Dropout(drop)(x)

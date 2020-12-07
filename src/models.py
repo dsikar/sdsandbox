@@ -143,7 +143,7 @@ def nvidia_model2(num_outputs):
     row, col, ch = conf.nvidia2_img_dims[conf.IMG_HEIGHT_NET_IDX], conf.nvidia2_img_dims[conf.IMG_WIDTH_NET_IDX], \
                    conf.nvidia2_img_dims[conf.IMG_DEPTH_IDX]
 
-    drop = 0.5
+    drop = 0.1
 
     img_in = Input(shape=(row, col, ch), name='img_in')
     x = img_in
@@ -151,15 +151,15 @@ def nvidia_model2(num_outputs):
     # x = Lambda(lambda x: x/127.5 - 1.0)(x) # normalize and re-center
     x = Lambda(lambda x: x / 255.0)(x)
     x = Conv2D(24, (5, 5), strides=(2, 2), activation='elu', name="conv2d_1")(x)
-    #x = Dropout(drop)(x)
+    x = Dropout(drop)(x)
     x = Conv2D(32, (5, 5), strides=(2, 2), activation='elu', name="conv2d_2")(x)
-    #x = Dropout(drop)(x)
+    x = Dropout(drop)(x)
     x = Conv2D(48, (5, 5), strides=(2, 2), activation='elu', name="conv2d_3")(x)
-    #x = Dropout(drop)(x)
+    x = Dropout(drop)(x)
     x = Conv2D(64, (3, 3), activation='elu', name="conv2d_4")(x) # default strides=(1,1)
-    #x = Dropout(drop)(x)
+    x = Dropout(drop)(x)
     x = Conv2D(64, (3, 3), activation='elu', name="conv2d_5")(x)
-    # x = Dropout(drop)(x)
+    x = Dropout(drop)(x)
 
     x = Flatten(name='flattened')(x)
 
@@ -244,32 +244,33 @@ def get_alexnet(num_outputs):
     '''
     #row, col, ch = conf.image_width_alexnet, conf.image_height_alexnet, conf.ch
     row, col, ch = conf.alexnet_img_dims[conf.IMG_HEIGHT_NET_IDX], conf.nvidia2_img_dims[conf.IMG_WIDTH_NET_IDX], \
-    #conf.nvidia2_img_dims[conf.IMG_DEPTH_IDX]
+    conf.nvidia2_img_dims[conf.IMG_DEPTH_IDX]
     drop = 0.5
-
+    # read https://stackoverflow.com/questions/58636087/tensorflow-valueerror-failed-to-convert-a-numpy-array-to-a-tensor-unsupporte
+    # to work out shapes
     img_in = Input(shape=(row, col, ch), name='img_in')
     x = img_in
     # x = Cropping2D(cropping=((10,0), (0,0)))(x) #trim 10 pixels off top
     x = Lambda(lambda x: x/127.5 - 1.0)(x) # normalize and re-center
     # x = Lambda(lambda x: x / 255.0)(x)
-    x = Conv2D(48, (8, 8), strides=(4, 4), padding='valid', activation='elu', name="conv2d_1")(x)
+    x = Conv2D(48, (8, 8), strides=(4, 4), padding='valid', activation='relu', name="conv2d_1")(x)
     # x = Dropout(drop)(x)
     x = MaxPooling2D(48, (1, 1), padding="same", name="maxpool2d_1")(x)
 
-    x = Conv2D(128, (3, 3), strides=(2, 2), padding='valid', activation='elu', name="conv2d_2")(x)
+    x = Conv2D(128, (3, 3), strides=(2, 2), padding='valid', activation='relu', name="conv2d_2")(x)
     #x = Dropout(drop)(x)
     x = MaxPooling2D(128, (1, 1), padding="same", name="maxpool2d_2")(x)
 
-    x = Conv2D(192, (3, 3), strides=(2, 2), padding='valid', activation='elu', name="conv2d_3")(x)
+    x = Conv2D(192, (3, 3), strides=(2, 2), padding='valid', activation='relu', name="conv2d_3")(x)
     #x = Dropout(drop)(x)
-    x = Conv2D(192, (3, 3), strides=(1, 1), padding='same', activation='elu', name="conv2d_4")(x) # default strides=(1,1)
+    x = Conv2D(192, (3, 3), strides=(1, 1), padding='same', activation='relu', name="conv2d_4")(x) # default strides=(1,1)
     #x = Dropout(drop)(x)
 
-    x = Conv2D(128, (3, 3), strides=(1, 1), padding='same', activation='elu', name="conv2d_5")(x)
+    x = Conv2D(128, (3, 3), strides=(1, 1), padding='same', activation='relu', name="conv2d_5")(x)
 
     x = MaxPooling2D(128, (1, 1), padding="same", name="maxpool2d_3")(x)
 
-    x = Conv2D(64, (3, 3), activation='elu', name="conv2d_6")(x)
+    #x = Conv2D(64, (3, 3), activation='relu', name="conv2d_6")(x)
     # error Negative dimension size caused by subtracting 128 from 10 for '{{node max_pooling2d/MaxPool}} = MaxPool[T=DT_FLOAT,
     # data_format="NHWC", ksize=[1, 128, 128, 1], padding="VALID", strides=[1, 3, 3, 1]](conv2d_4/Identity)'
     # with input shapes: [?,10,10,192].
@@ -303,13 +304,13 @@ def get_alexnet(num_outputs):
 
     x = Flatten(name='flattened')(x) # error when followed by
 
-    x = Dense(100, name='Dense_1', activation='elu')(x)# 2048, 2048 ~  Input to reshape is a tensor with 442368 values, but the requested shape requires a multiple of 21632
+    x = Dense(2048, name='Dense_1', activation='relu')(x)# 2048, 2048 ~  Input to reshape is a tensor with 442368 values, but the requested shape requires a multiple of 21632
 	 # [[node model/flattened/Reshape (defined at /git/sdsandbox/src/train.py:272) ]] [Op:__inference_train_function_1192]
 
     # x = Dropout(drop)(x)
     x = Dense(50, name='Dense_2', activation='elu')(x)
     # x = Dropout(drop)(x)
-    # x = Dense(10, activation='elu')(x) # Added in Naoki's model
+    x = Dense(10, activation='elu')(x) # Added in Naoki's model
 
     outputs = []
     # outputs.append(Dense(num_outputs, activation='linear', name='steering_throttle')(x))

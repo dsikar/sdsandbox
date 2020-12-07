@@ -42,10 +42,10 @@ NVIDIA1 = 'nvidia1' # a.k.a. TawnNet
 nvidia1_img_dims = [160,120,3,160,120,60,-25]
 # NVIDIA2
 NVIDIA2 = 'nvidia2' # a.k.a. NaokiNet
-nvidia2_img_dims = [320,160,3,200,66,70,-35]
+nvidia2_img_dims = [320,160,3,200,66,81,-35]
 # NVIDIA_BASELINE
 NVIDIA_BASELINE = 'nvidia_baseline' # a.k.a. NaokiNet
-nvidia_baseline_img_dims = [320,160,3,200,66,70,-35]
+nvidia_baseline_img_dims = [320,160,3,200,66,91,-35]
 
 # Alexnet
 image_width_alexnet = 224

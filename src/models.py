@@ -141,7 +141,7 @@ def nvidia_model2(num_outputs):
     row, col, ch = conf.nvidia2_img_dims[conf.IMG_HEIGHT_NET_IDX], conf.nvidia2_img_dims[conf.IMG_WIDTH_NET_IDX], \
                    conf.nvidia2_img_dims[conf.IMG_DEPTH_IDX]
 
-    drop = 0.5
+    drop = 0.1
 
     img_in = Input(shape=(row, col, ch), name='img_in')
     x = img_in
@@ -149,13 +149,13 @@ def nvidia_model2(num_outputs):
     x = Lambda(lambda x: x/127.5 - 1.0)(x) # normalize and re-center
     # x = Lambda(lambda x: x / 255.0)(x)
     x = Conv2D(24, (5, 5), strides=(2, 2), activation='elu', name="conv2d_1")(x)
-    # x = Dropout(drop)(x)
-    x = Conv2D(36, (5, 5), strides=(2, 2), activation='elu', name="conv2d_2")(x)
-    # x = Dropout(drop)(x)
+    x = Dropout(drop)(x)
+    x = Conv2D(32, (5, 5), strides=(2, 2), activation='elu', name="conv2d_2")(x)
+    x = Dropout(drop)(x)
     x = Conv2D(48, (5, 5), strides=(2, 2), activation='elu', name="conv2d_3")(x)
-    # x = Dropout(drop)(x)
+    x = Dropout(drop)(x)
     x = Conv2D(64, (3, 3), activation='elu', name="conv2d_4")(x) # default strides=(1,1)
-    # x = Dropout(drop)(x)
+    x = Dropout(drop)(x)
     x = Conv2D(64, (3, 3), activation='elu', name="conv2d_5")(x)
     x = Dropout(drop)(x)
 
@@ -182,7 +182,7 @@ def nvidia_model3(num_outputs):
     '''
     row, col, ch = conf.row, conf.col, conf.ch
 
-    drop = 0.5
+    drop = 0.1
 
     img_in = Input(shape=(row, col, ch), name='img_in')
     x = img_in
@@ -193,7 +193,7 @@ def nvidia_model3(num_outputs):
     # x = Dropout(drop)(x)
     x = Conv2D(36, (5, 5), strides=(2, 2), activation='elu', name="conv2d_2")(x)
     #x = Dropout(drop)(x)
-    x = Conv2D(64, (5, 5), strides=(2, 2), activation='elu', name="conv2d_3")(x)
+    x = Conv2D(48, (5, 5), strides=(2, 2), activation='elu', name="conv2d_3")(x)
     #x = Dropout(drop)(x)
     x = Conv2D(64, (3, 3), activation='elu', name="conv2d_4")(x) # default strides=(1,1)
     #x = Dropout(drop)(x)

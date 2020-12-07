@@ -127,7 +127,7 @@ class DonkeySimMsgHandler(IMesgHandler):
         self.frame_count += 1
         self.img_orig = img_arr
 
-        # same image size expected by original network
+        # set to same image size expected from acquisition process
         img_arr = ag.resize_expected(img_arr)
         # same preprocessing as for training
         img_arr = ag.preprocess(img_arr)
@@ -309,7 +309,7 @@ if __name__ == "__main__":
     ag = Augmentation.Augmentation(args.modelname)
 
     if conf.record == True:
-        print("*** When finished, press CTRL+C and y to finish recording, the CTRL+C to quit ***")
+        print("*** When finished, press CTRL+C and y to finish recording, then CTRL+C to quit ***")
         original_sigint = signal.getsignal(signal.SIGINT)
         signal.signal(signal.SIGINT, stop_exec)
         rv = RecordVideo.RecordVideo(args.model, "video", args.img_cnt)

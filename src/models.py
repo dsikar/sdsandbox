@@ -96,7 +96,7 @@ def nvidia_model1(num_outputs):
     '''
     # row, col, ch = conf.row, conf.col, conf.ch
     # better albeit less readable
-    row, col, ch = conf.nvidia1_img_dims[conf.IMG_HEIGHT_IDX], conf.nvidia1_img_dims[conf.IMG_WIDTH_IDX], conf.nvidia1_img_dims[conf.IMG_DEPTH_IDX]
+    row, col, ch = conf.nvidia1_img_dims[conf.IMG_HEIGHT_NET_IDX], conf.nvidia1_img_dims[conf.IMG_WIDTH_NET_IDX], conf.nvidia1_img_dims[conf.IMG_DEPTH_IDX]
     drop = 0.1
     
     img_in = Input(shape=(row, col, ch), name='img_in')
@@ -134,10 +134,11 @@ def nvidia_model1(num_outputs):
 
 def nvidia_model2(num_outputs):
     '''
+    A.K.A. NaokiNet - https://github.com/naokishibuya/car-behavioral-cloning/blob/master/model.py
     This model expects images of size 66,200,3
     '''
     # row, col, ch = conf.row, conf.col, conf.ch
-    row, col, ch = conf.nvidia2_img_dims[conf.IMG_HEIGHT_IDX], conf.nvidia2_img_dims[conf.IMG_WIDTH_IDX], \
+    row, col, ch = conf.nvidia2_img_dims[conf.IMG_HEIGHT_NET_IDX], conf.nvidia2_img_dims[conf.IMG_WIDTH_NET_IDX], \
                    conf.nvidia2_img_dims[conf.IMG_DEPTH_IDX]
 
     drop = 0.5
@@ -151,7 +152,7 @@ def nvidia_model2(num_outputs):
     # x = Dropout(drop)(x)
     x = Conv2D(36, (5, 5), strides=(2, 2), activation='elu', name="conv2d_2")(x)
     #x = Dropout(drop)(x)
-    x = Conv2D(64, (5, 5), strides=(2, 2), activation='elu', name="conv2d_3")(x)
+    x = Conv2D(48, (5, 5), strides=(2, 2), activation='elu', name="conv2d_3")(x)
     #x = Dropout(drop)(x)
     x = Conv2D(64, (3, 3), activation='elu', name="conv2d_4")(x) # default strides=(1,1)
     #x = Dropout(drop)(x)

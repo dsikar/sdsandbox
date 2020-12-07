@@ -241,7 +241,8 @@ def get_alexnet(num_outputs):
     0.5 on a single layer
     '''
     row, col, ch = conf.image_width_alexnet, conf.image_height_alexnet, conf.ch
-
+    #row, col, ch = conf.nvidia2_img_dims[conf.IMG_HEIGHT_NET_IDX], conf.nvidia2_img_dims[conf.IMG_WIDTH_NET_IDX], \
+    #conf.nvidia2_img_dims[conf.IMG_DEPTH_IDX]
     drop = 0.5
 
     img_in = Input(shape=(row, col, ch), name='img_in')

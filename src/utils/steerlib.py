@@ -25,6 +25,65 @@ def load_json(filepath):
         data = json.load(fp)
     return data
 
+
+def GetSteeringFromtcpflow(filename):
+    """
+    Get a tcpflow log and extract steering values obtained from network communication between.
+    Note, we only plot the predicted steering angle jsondict['steering']
+    and the value of jsondict['steering_angle'] is ignored. Assumed to be the steering angle
+    calculated by PID given the current course.
+    sim and prediction engine (predict_client.py)
+    Inputs
+        filename: string, name of tcpflow log
+    Returns
+        sa: list of arrays, steering angle predicton and actual value tuple.
+    Example
+
+
+    """
+    # open file
+    sa = []
+    # initialize prediction
+    pred = ''
+    f = open(filename, "r")
+    file = f.read()
+    try:
+        # readline = f.read()
+        lines = file.splitlines()
+        for line in lines:
+            # print(line)
+            start = line.find('{')
+            if (start == -1):
+                continue
+            jsonstr = line[start:]
+            # print(jsonstr)
+            jsondict = json.loads(jsonstr)
+            if "steering" in jsondict:
+                # predicted
+                pred = jsondict['steering']
+                # jsondict['steering_angle']
+                # sa.append([float(pred), act])
+                sa.append([float(pred), float(pred)])  # append twice to keep code from breaking
+            # if "steering_angle" in jsondict:
+            # actual
+            #   act = jsondict['steering_angle']
+            # save pair, only keep last pred in case two were send as it does happen i.e.:
+            # 127.000.000.001.59460-127.000.000.001.09091: {"msg_type": "control", "steering": "-0.071960375", "throttle": "0.08249988406896591", "brake": "0.0"}
+            # 127.000.000.001.59460-127.000.000.001.09091: {"msg_type": "control", "steering": "-0.079734944", "throttle": "0.08631626516580582", "brake": "0.0"}
+            # 127.000.000.001.09091-127.000.000.001.59460: {"msg_type":"telemetry","steering_angle":-0.07196037,(...)
+            #   if(len(pred) > 0):
+            #      sa.append([float(pred), act])
+            #      pred = '' # need to save this image
+            # deal with image later, sort out plot first
+            # imgString = jsondict["image"]
+            # image = Image.open(BytesIO(base64.b64decode(imgString)))
+            # img_arr = np.asarray(image, dtype=np.float32)
+    except Exception as e:
+        print("Exception raise: " + str(e))
+    # file should be automatically closed but will close for good measure
+    f.close()
+    return sa
+
 def GetJSONSteeringAngles(filemask):
     """
     Get steering angles stored as 'user/angle' attributes in .json files
@@ -191,6 +250,53 @@ def plotSteeringAngles(p, g=None, n=1, save=False, track= "Track Name", mname="m
     # if need be
     return plt
 
+def plotMultipleSteeringAngles(p, n=1, save=False, track= "Track Name", mname="model name", title='title', w, h):
+    """
+    Plot predicted and (TODO) optionally ground truth steering angles
+    Inputs
+        p: list of tuples, prediction and labels
+        n: float, steering normalization constant
+        save: boolean, save plot flag
+        track, mname, title: string, track (data), trained model and title strings for plot
+        w: integer, plot width
+        h: integer, plot height
+    Outputs
+        plt: pyplot, plot
+    Example
+    # get some steering angles
+    sa = GetSteeringFromtcpflow('../trained_models/nvidia1/tcpflow/20201207091932_nvidia1_no_rain_tcpflow.log')
+    sarr = np.asarray(sa)
+    pa = sarr[:,0]
+    p.append([pa, 'no rain'])
+    plotSteeringAngles(p, g, nc, True, datapath[-2], modelpath[-1], 'Gs ' + gss)
+    """
+
+    plt.rcParams["figure.figsize"] = (18,3)
+
+    plt.plot(p*n, label="predicted")
+    try:
+        if (g is not None):
+            plt.plot(g*n, label="ground truth")
+    except Exception as e:
+        print("problems plotting: " + str(e))
+
+    plt.ylabel('Steering angle')
+    # Set a title of the current axes.
+    # plt.title('tcpflow log predicted steering angles: track ' + track + ' model ' + mname)
+    plt.title(title + ' Steering angles: track ' + track + ', model ' + mname)
+    # show a legend on the plot
+    plt.legend()
+    # Display a figure.
+    # horizontal grid only
+    plt.grid(axis='y')
+    # set limit
+    plt.xlim([-5,len(p)+5])
+    plt.gca().invert_yaxis()
+    # plt.show()
+    if(save==True):
+        plt.savefig('sa_' + track + '_' + mname + '.png')
+    # if need be
+    return plt
 
 def getSteeringFromtcpflow(filename):
     """
@@ -265,6 +371,12 @@ if __name__ == "__main__":
 
     #args = parser.parse_args()
     #svals = jsonSteeringBins('~/git/msc-data/unity/genRoad/*.jpg', 'genRoad')
+    p = []
+    sa = GetSteeringFromtcpflow('../trained_models/nvidia1/tcpflow/20201207091932_nvidia1_no_rain_tcpflow.log')
+    sarr = np.asarray(sa)
+    pa = sarr[:,0]
+    p.append([pa, 'no rain'])
+
     path = 'record_11640.json'
     js = load_json(path)
     print(js)

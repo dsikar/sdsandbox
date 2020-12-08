@@ -233,6 +233,7 @@ def plotSteeringAngles(p, g=None, n=1, save=False, track= "Track Name", mname="m
         print("problems plotting: " + str(e))
 
     plt.ylabel('Steering angle')
+    plt.xlabel('Frame number')
     # Set a title of the current axes.
     # plt.title('tcpflow log predicted steering angles: track ' + track + ' model ' + mname)
     plt.title(title + ' Steering angles: track ' + track + ', model ' + mname)
@@ -443,6 +444,7 @@ def plots1():
     plotMultipleSteeringAngles(p, 25, True, "Generated Track intensity multiplier 8", "20201207091932_nvidia.h5",
                                'tcpflow log predicted')
 
+
 if __name__ == "__main__":
     # plot_hist("/home/simbox/git/sdsandbox/trained_models/nvidia1/20201107144927_nvidia1.history")
 #if __name__ == "__main__":
@@ -457,3 +459,4 @@ if __name__ == "__main__":
     #js = load_json(path)
     #print(js)
     # plotSteeringAngles(p, None, 25, True, "Generated Track", "20201120171015_sanity.h5", 'tcpflow log predicted')
+    plots1()

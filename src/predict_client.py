@@ -165,7 +165,7 @@ class DonkeySimMsgHandler(IMesgHandler):
 
             # Add first image, with name of network and frame number
             # TODO, get network name from argument
-            text = ([rv.modelname, 'Intensity Multiplie: 1', 'Acquired image', 'Frame:  ' + str(self.frame_count)])
+            text = ([rv.modelname, 'Intensity Multiplie: 4', 'Acquired image', 'Frame:  ' + str(self.frame_count)])
             rv.add_image(self.img_orig, text)
 
             # Add second image, preprocessed with rain or without

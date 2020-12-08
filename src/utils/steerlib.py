@@ -4,7 +4,6 @@ import fnmatch
 import json
 import os
 import numpy as np
-import argparse
 import matplotlib.pyplot as plt
 import statistics
 import seaborn as sns
@@ -251,7 +250,7 @@ def plotSteeringAngles(p, g=None, n=1, save=False, track= "Track Name", mname="m
     # if need be
     return plt
 
-def plotMultipleSteeringAngles(p, n=25, save=False, track="Track Name", mname="model name", title='title', w=18, h=3):
+def plotMultipleSteeringAngles(p, n=25, save=False, track="Track Name", mname="model name", title='title', w=18, h=4):
     """
     Plot multiple predicted and (TODO) optionally ground truth steering angles
     Inputs
@@ -271,7 +270,7 @@ def plotMultipleSteeringAngles(p, n=25, save=False, track="Track Name", mname="m
     p.append([pa, 'no rain'])
     plotSteeringAngles(p, g, nc, True, datapath[-2], modelpath[-1], 'Gs ' + gss)
     """
-
+    import matplotlib.pyplot as plt # local copy
     plt.rcParams["figure.figsize"] = (w,h)
 
     for i in range (0, len(p)):
@@ -283,6 +282,7 @@ def plotMultipleSteeringAngles(p, n=25, save=False, track="Track Name", mname="m
     #    print("problems plotting: " + str(e))
 
     plt.ylabel('Steering angle')
+    plt.xlabel('Frame number')
     # Set a title of the current axes.
     # plt.title('tcpflow log predicted steering angles: track ' + track + ' model ' + mname)
     plt.title(title + ' Steering angles: track ' + track + ', model ' + mname)
@@ -358,93 +358,6 @@ def getSteeringFromtcpflow(filename):
     f.close()
     return sa
 
-
-def plots1():
-    """
-    Hardcoding results' plots
-    """
-
-    # intensity multiplier = 1
-    p = []
-    # No rain mult 1 (shaw we have a "no rain" for every multiplier ?)
-    sa = GetSteeringFromtcpflow('../../trained_models/nvidia1/tcpflow/20201207091932_nvidia1_no_rain_tcpflow.log')
-    sarr = np.asarray(sa)
-    pa = sarr[:,0]
-    p.append([pa, 'no rain'])
-    # light mult 1
-    sa = GetSteeringFromtcpflow('../../trained_models/nvidia1/tcpflow/20201207091932_nvidia1_light_rain_mult_1_tcpflow.log')
-    sarr = np.asarray(sa)
-    pa = sarr[:,0]
-    p.append([pa, 'light rain'])
-    # heavy mult 1
-    sa = GetSteeringFromtcpflow('../../trained_models/nvidia1/tcpflow/20201207091932_nvidia1_heavy_10__mult_1_tcpflow.log')
-    sarr = np.asarray(sa)
-    pa = sarr[:,0]
-    p.append([pa, 'heavy rain slant +-10'])
-    # torrential mult 1
-    sa = GetSteeringFromtcpflow('../../trained_models/nvidia1/tcpflow/20201207091932_nvidia1_torrential_20__mult_1_tcpflow.log')
-    sarr = np.asarray(sa)
-    pa = sarr[:,0]
-    p.append([pa, 'torrential rain slant +-20'])
-
-    plotMultipleSteeringAngles(p, 25, True, "Generated Track intensity multiplier 4", "20201207091932_nvidia.h5", 'tcpflow log predicted')
-
-    # intensity multiplier = 4
-    p = []
-    # No rain mult 1 (shaw we have a "no rain" for every multiplier ?)
-    sa = GetSteeringFromtcpflow('../../trained_models/nvidia1/tcpflow/20201207091932_nvidia1_no_rain_tcpflow.log')
-    sarr = np.asarray(sa)
-    pa = sarr[:, 0]
-    p.append([pa, 'no rain'])
-    # light mult 1
-    sa = GetSteeringFromtcpflow('../../trained_models/nvidia1/tcpflow/20201207091932_nvidia1_light_rain_mult_4_tcpflow.log')
-    sarr = np.asarray(sa)
-    pa = sarr[:, 0]
-    p.append([pa, 'light rain'])
-    # heavy mult 1
-    sa = GetSteeringFromtcpflow('../../trained_models/nvidia1/tcpflow/20201207091932_nvidia1_heavy_10__mult_4_tcpflow.log')
-    sarr = np.asarray(sa)
-    pa = sarr[:, 0]
-    p.append([pa, 'heavy rain slant +-10'])
-    # torrential mult 1
-    sa = GetSteeringFromtcpflow('../../trained_models/nvidia1/tcpflow/20201207091932_nvidia1_torrential_20__mult_4_tcpflow.log')
-    sarr = np.asarray(sa)
-    pa = sarr[:, 0]
-    p.append([pa, 'torrential rain slant +-20'])
-
-    plotMultipleSteeringAngles(p, 25, True, "Generated Track intensity multiplier 4", "20201207091932_nvidia.h5",
-                               'tcpflow log predicted')
-
-    # intensity multiplier = 8
-    p = []
-    # No rain mult 1 (shaw we have a "no rain" for every multiplier ?)
-    sa = GetSteeringFromtcpflow('../../trained_models/nvidia1/tcpflow/20201207091932_nvidia1_no_rain_tcpflow.log')
-    sarr = np.asarray(sa)
-    pa = sarr[:, 0]
-    p.append([pa, 'no rain'])
-    # light mult 1
-    sa = GetSteeringFromtcpflow(
-        '../../trained_models/nvidia1/tcpflow/20201207091932_nvidia1_light_rain_mult_8_tcpflow.log')
-    sarr = np.asarray(sa)
-    pa = sarr[:, 0]
-    p.append([pa, 'light rain'])
-    # heavy mult 1
-    sa = GetSteeringFromtcpflow(
-        '../../trained_models/nvidia1/tcpflow/20201207091932_nvidia1_heavy_10__mult_8_tcpflow.log')
-    sarr = np.asarray(sa)
-    pa = sarr[:, 0]
-    p.append([pa, 'heavy rain slant +-10'])
-    # torrential mult 1
-    sa = GetSteeringFromtcpflow(
-        '../../trained_models/nvidia1/tcpflow/20201207091932_nvidia1_torrential_20__mult_8_tcpflow.log')
-    sarr = np.asarray(sa)
-    pa = sarr[:, 0]
-    p.append([pa, 'torrential rain slant +-20'])
-
-    plotMultipleSteeringAngles(p, 25, True, "Generated Track intensity multiplier 8", "20201207091932_nvidia.h5",
-                               'tcpflow log predicted')
-
-
 if __name__ == "__main__":
     # plot_hist("/home/simbox/git/sdsandbox/trained_models/nvidia1/20201107144927_nvidia1.history")
 #if __name__ == "__main__":
@@ -455,8 +368,8 @@ if __name__ == "__main__":
     #svals = jsonSteeringBins('~/git/msc-data/unity/genRoad/*.jpg', 'genRoad')
 
 
-    #path = 'record_11640.json'
-    #js = load_json(path)
-    #print(js)
+    path = 'record_11640.json'
+    js = load_json(path)
+    print(js)
     # plotSteeringAngles(p, None, 25, True, "Generated Track", "20201120171015_sanity.h5", 'tcpflow log predicted')
-    plots1()
+    # plots1()

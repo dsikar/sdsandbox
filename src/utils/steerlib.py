@@ -4,7 +4,6 @@ import fnmatch
 import json
 import os
 import numpy as np
-import argparse
 import matplotlib.pyplot as plt
 import statistics
 import seaborn as sns
@@ -24,6 +23,65 @@ def load_json(filepath):
     with open(filepath, "rt") as fp:
         data = json.load(fp)
     return data
+
+
+def GetSteeringFromtcpflow(filename):
+    """
+    Get a tcpflow log and extract steering values obtained from network communication between.
+    Note, we only plot the predicted steering angle jsondict['steering']
+    and the value of jsondict['steering_angle'] is ignored. Assumed to be the steering angle
+    calculated by PID given the current course.
+    sim and prediction engine (predict_client.py)
+    Inputs
+        filename: string, name of tcpflow log
+    Returns
+        sa: list of arrays, steering angle predicton and actual value tuple.
+    Example
+
+
+    """
+    # open file
+    sa = []
+    # initialize prediction
+    pred = ''
+    f = open(filename, "r")
+    file = f.read()
+    try:
+        # readline = f.read()
+        lines = file.splitlines()
+        for line in lines:
+            # print(line)
+            start = line.find('{')
+            if (start == -1):
+                continue
+            jsonstr = line[start:]
+            # print(jsonstr)
+            jsondict = json.loads(jsonstr)
+            if "steering" in jsondict:
+                # predicted
+                pred = jsondict['steering']
+                # jsondict['steering_angle']
+                # sa.append([float(pred), act])
+                sa.append([float(pred), float(pred)])  # append twice to keep code from breaking
+            # if "steering_angle" in jsondict:
+            # actual
+            #   act = jsondict['steering_angle']
+            # save pair, only keep last pred in case two were send as it does happen i.e.:
+            # 127.000.000.001.59460-127.000.000.001.09091: {"msg_type": "control", "steering": "-0.071960375", "throttle": "0.08249988406896591", "brake": "0.0"}
+            # 127.000.000.001.59460-127.000.000.001.09091: {"msg_type": "control", "steering": "-0.079734944", "throttle": "0.08631626516580582", "brake": "0.0"}
+            # 127.000.000.001.09091-127.000.000.001.59460: {"msg_type":"telemetry","steering_angle":-0.07196037,(...)
+            #   if(len(pred) > 0):
+            #      sa.append([float(pred), act])
+            #      pred = '' # need to save this image
+            # deal with image later, sort out plot first
+            # imgString = jsondict["image"]
+            # image = Image.open(BytesIO(base64.b64decode(imgString)))
+            # img_arr = np.asarray(image, dtype=np.float32)
+    except Exception as e:
+        print("Exception raise: " + str(e))
+    # file should be automatically closed but will close for good measure
+    f.close()
+    return sa
 
 def GetJSONSteeringAngles(filemask):
     """
@@ -174,6 +232,7 @@ def plotSteeringAngles(p, g=None, n=1, save=False, track= "Track Name", mname="m
         print("problems plotting: " + str(e))
 
     plt.ylabel('Steering angle')
+    plt.xlabel('Frame number')
     # Set a title of the current axes.
     # plt.title('tcpflow log predicted steering angles: track ' + track + ' model ' + mname)
     plt.title(title + ' Steering angles: track ' + track + ', model ' + mname)
@@ -191,6 +250,55 @@ def plotSteeringAngles(p, g=None, n=1, save=False, track= "Track Name", mname="m
     # if need be
     return plt
 
+def plotMultipleSteeringAngles(p, n=25, save=False, track="Track Name", mname="model name", title='title', w=18, h=4):
+    """
+    Plot multiple predicted and (TODO) optionally ground truth steering angles
+    Inputs
+        p: list of tuples, prediction and labels
+        n: float, steering normalization constant
+        save: boolean, save plot flag
+        track, mname, title: string, track (data), trained model and title strings for plot
+        w: integer, plot width
+        h: integer, plot height
+    Outputs
+        plt: pyplot, plot
+    Example
+    # get some steering angles
+    sa = GetSteeringFromtcpflow('../trained_models/nvidia1/tcpflow/20201207091932_nvidia1_no_rain_tcpflow.log')
+    sarr = np.asarray(sa)
+    pa = sarr[:,0]
+    p.append([pa, 'no rain'])
+    plotSteeringAngles(p, g, nc, True, datapath[-2], modelpath[-1], 'Gs ' + gss)
+    """
+    import matplotlib.pyplot as plt # local copy
+    plt.rcParams["figure.figsize"] = (w,h)
+
+    for i in range (0, len(p)):
+        plt.plot(p[i][0]*n, label=p[i][1])
+    #try:
+      #  if (g is not None):
+     #       plt.plot(g*n, label="ground truth")
+    #except Exception as e:
+    #    print("problems plotting: " + str(e))
+
+    plt.ylabel('Steering angle')
+    plt.xlabel('Frame number')
+    # Set a title of the current axes.
+    # plt.title('tcpflow log predicted steering angles: track ' + track + ' model ' + mname)
+    plt.title(title + ' Steering angles: track ' + track + ', model ' + mname)
+    # show a legend on the plot
+    plt.legend()
+    # Display a figure.
+    # horizontal grid only
+    plt.grid(axis='y')
+    # set limit
+    plt.xlim([-5,len(p[0][0])+5])
+    plt.gca().invert_yaxis()
+    # plt.show()
+    if(save==True):
+        plt.savefig('sa_' + track + '_' + mname + '.png')
+    # if need be
+    return plt
 
 def getSteeringFromtcpflow(filename):
     """
@@ -250,13 +358,6 @@ def getSteeringFromtcpflow(filename):
     f.close()
     return sa
 
-#sa = GetSteeringFromtcpflow('../../dataset/unity/genRoad/tcpflow/20201120184912_sanity.log')
-#sarr = np.asarray(sa)
-#p = sarr[:,0]
-#g = sarr[:,1]
-
-
-
 if __name__ == "__main__":
     # plot_hist("/home/simbox/git/sdsandbox/trained_models/nvidia1/20201107144927_nvidia1.history")
 #if __name__ == "__main__":
@@ -265,7 +366,10 @@ if __name__ == "__main__":
 
     #args = parser.parse_args()
     #svals = jsonSteeringBins('~/git/msc-data/unity/genRoad/*.jpg', 'genRoad')
+
+
     path = 'record_11640.json'
     js = load_json(path)
     print(js)
     # plotSteeringAngles(p, None, 25, True, "Generated Track", "20201120171015_sanity.h5", 'tcpflow log predicted')
+    # plots1()

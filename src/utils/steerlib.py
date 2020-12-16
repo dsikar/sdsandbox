@@ -8,6 +8,15 @@ import matplotlib.pyplot as plt
 import statistics
 import seaborn as sns
 import pickle
+from PIL import Image
+# prediction
+import tensorflow as tf
+from tensorflow.python import keras
+from tensorflow.python.keras.models import load_model
+# rain
+from predict_client import add_rain
+# Augmentation library
+import Augmentation
 
 def load_json(filepath):
     """
@@ -23,7 +32,6 @@ def load_json(filepath):
     with open(filepath, "rt") as fp:
         data = json.load(fp)
     return data
-
 
 def GetSteeringFromtcpflow(filename):
     """
@@ -98,7 +106,8 @@ def GetJSONSteeringAngles(filemask):
     for root, dirnames, filenames in os.walk(path):
         for filename in fnmatch.filter(filenames, mask):
             matches.append(os.path.join(root, filename))
-
+    # sort by create date
+    matches = sorted(matches, key=os.path.getmtime)
     # steering values
     svals = []
     for fullpath in matches:
@@ -358,18 +367,392 @@ def getSteeringFromtcpflow(filename):
     f.close()
     return sa
 
+"""
+
+# get image
+
+# get steering
+
+# add / don't add rain
+
+outputs = self.model.predict(image_array)
+
+Append groundtruth, predicted to list.
+"""
+def PrintLatexRowModelGOS(filemask, modelpath, modelname, rt='', st=0):
+    """
+    Generate a "goodness of fit value" for a model on a given track
+    Inputs
+        filemask: string, path and mask
+        modelpath: string, path to keras model
+        modelname: string, canonical model name e.g. nvidia1, nvidia2, nvidia_baseline
+        rt: string, rain type e.g. drizzle/light, heavy torrential
+        st: integer, -+20 degree rain slant
+    Outputs
+        svals: list, ground truth steering values and predictions
+    """
+    # load augmentation library for correct model geometry
+    ag = Augmentation.Augmentation(modelname)
+
+    # load model
+    print("loading model", modelpath)
+    model = load_model(modelpath)
+
+    # In this mode, looks like we have to compile it
+    model.compile("sgd", "mse")
+    filemask = os.path.expanduser(filemask)
+    path, mask = os.path.split(filemask)
+
+    matches = []
+    for root, dirnames, filenames in os.walk(path):
+        for filename in fnmatch.filter(filenames, mask):
+            matches.append(os.path.join(root, filename))
+
+    # steering values
+    svals = []
+    for fullpath in matches:
+        frame_number = os.path.basename(fullpath).split("_")[0]
+        json_filename = os.path.join(os.path.dirname(fullpath), "record_" + frame_number + ".json")
+        jobj = load_json(json_filename)
+        # steering ground truth
+        steer_gt = jobj['user/angle']
+        # open the image
+        img_arr = Image.open(fullpath)
+        # Convert PIL Image to numpy array
+        img_arr = np.array(img_arr, dtype=np.float32)
+        # add rain if need be
+        if rt != '':
+            img_arr = add_rain(img_arr, rt, st)
+        # apply same preprocessing
+        # same preprocessing as for training
+        img_arr = ag.preprocess(img_arr)
+
+        # put in correct format
+        img_arr = img_arr.reshape((1,) + img_arr.shape)
+        # generate prediction
+        outputs = model.predict(img_arr)
+        # store predictions
+        steer_pred = outputs[0][0]
+        # store ground truth and prediction
+        svals.append([steer_pred, steer_gt])
+    # get goodness of fit
+    sarr = np.asarray(svals)
+    p = sarr[:, 0]
+    g = sarr[:, 1]
+    nc = 25 # unity maximum steering angle / normalization constant - should hold in conf.py and managed with Augmentation
+    mygos = gos(p, g, nc)
+    # format to human readable/friendlier 2 decimal places
+    gos_str = "{:.2f}".format(round(mygos, 2))
+    # strip path from modelpath
+    modelfile = modelpath.split('/')
+    modelfile = modelfile[-1]
+    # print latex formated data
+    # header
+    hd_str = 'Filename & Model & Rain Type & Slant & gos \\\\ \hline'
+    # log file
+    print('Log: ', path, '\\\\ \hline')
+    print(hd_str)
+    # results
+    res_str = f'{modelfile} & {modelname} & {rt} & {st} & {gos_str} \\\\ \hline'
+    print(res_str)
+
+def GetPredictedSteeringAngles(filemask, model, modelname, rt='', st=0):
+    """
+    Generate a "goodness of fit value" for a model on a given track
+    Inputs
+        filemask: string, path and mask
+        modelpath: string, path to keras model
+        modelname: string, canonical model name e.g. nvidia1, nvidia2, nvidia_baseline
+        rt: string, rain type e.g. drizzle/light, heavy torrential
+        st: integer, -+20 degree rain slant
+    Outputs
+        svals: list, ground truth steering values and predictions
+    """
+    # load augmentation library for correct model geometry
+    ag = Augmentation.Augmentation(modelname)
+
+    # load model
+    print("loading model", modelpath)
+    # assume model is loaded and compiled
+    # model = load_model(modelpath)
+
+    # In this mode, looks like we have to compile it
+    # model.compile("sgd", "mse")
+    filemask = os.path.expanduser(filemask)
+    path, mask = os.path.split(filemask)
+
+    matches = []
+    for root, dirnames, filenames in os.walk(path):
+        for filename in fnmatch.filter(filenames, mask):
+            matches.append(os.path.join(root, filename))
+
+    # steering values
+    svals = []
+    for fullpath in matches:
+        frame_number = os.path.basename(fullpath).split("_")[0]
+        json_filename = os.path.join(os.path.dirname(fullpath), "record_" + frame_number + ".json")
+        jobj = load_json(json_filename)
+        # steering ground truth
+        steer_gt = jobj['user/angle']
+        # open the image
+        img_arr = Image.open(fullpath)
+        # Convert PIL Image to numpy array
+        img_arr = np.array(img_arr, dtype=np.float32)
+        # add rain if need be
+        if rt != '':
+            img_arr = add_rain(img_arr, rt, st)
+        # apply same preprocessing
+        # same preprocessing as for training
+        img_arr = ag.preprocess(img_arr)
+
+        # put in correct format
+        img_arr = img_arr.reshape((1,) + img_arr.shape)
+        # generate prediction
+        outputs = model.predict(img_arr)
+        # store predictions
+        steer_pred = outputs[0][0]
+        # store ground truth and prediction
+        svals.append([steer_pred, steer_gt])
+    return svals
+
+def printGOSRows():
+    """
+    Print GOS rows for results report.
+    We are comparing mainly the two best models for nvidia1 and nvidia2, would have been nice to also test
+    the driveable nvidia_baseline, and sanity models
+    """
+    # models
+    # nvidia2 - ../../trained_models/nvidia2/20201207192948_nvidia2.h5
+    # nvidia1 - ../../trained_models/nvidia1/20201207091932_nvidia1.h5
+    # 20201120124421\_nvidia\_baseline.h5
+    # log logs_Wed_Nov_25_23_39_22_2020
+    ############################################
+    # 1. nvidia2 Generated track
+    ############################################
+    # log = '../../dataset/unity/genTrack/genTrackOneLap/logs_Wed_Nov_25_23_39_22_2020/*.jpg'
+    #modelpath = '../../trained_models/nvidia2/20201207192948_nvidia2.h5'
+    #modelname = 'nvidia2'
+    #rt = 'torrential'
+    #st = 20
+    #PrintLatexRowModelGOS(log, modelpath, modelname, rt, st)
+    # Log:  ../../dataset/unity/genTrack/genTrackOneLap/logs_Wed_Nov_25_23_39_22_2020 \\ \hline
+    # Filename & Model & Rain Type & Slant & gos \\ \hline
+    # 20201207192948_nvidia2.h5 & nvidia2 &  & 0 & 1.68 \\ \hline
+    # Log:  ../../dataset/unity/genTrack/genTrackOneLap/logs_Wed_Nov_25_23_39_22_2020 \\ \hline
+    # Filename & Model & Rain Type & Slant & gos \\ \hline
+    # 20201207192948_nvidia2.h5 & nvidia2 & light & 0 & 2.12 \\ \hline
+    # Log:  ../../dataset/unity/genTrack/genTrackOneLap/logs_Wed_Nov_25_23_39_22_2020 \\ \hline
+    # Filename & Model & Rain Type & Slant & gos \\ \hline
+    # 20201207192948_nvidia2.h5 & nvidia2 & heavy & 10 & 2.17 \\ \hline
+    # Log:  ../../dataset/unity/genTrack/genTrackOneLap/logs_Wed_Nov_25_23_39_22_2020 \\ \hline
+    # Filename & Model & Rain Type & Slant & gos \\ \hline
+    # 20201207192948_nvidia2.h5 & nvidia2 & torrential & 20 & 2.30 \\ \hline
+    #####################################################
+    # 2. nvidia1 Generated track
+    #####################################################
+    # modelpath = '../../trained_models/nvidia1/20201207091932_nvidia1.h5'
+    #modelname = 'nvidia1'
+    #rt = 'torrential'
+    #st = 20
+    #PrintLatexRowModelGOS(log, modelpath, modelname, rt, st)
+    # Log:  ../../dataset/unity/genTrack/genTrackOneLap/logs_Wed_Nov_25_23_39_22_2020 \\ \hline
+    # Filename & Model & Rain Type & Slant & gos \\ \hline
+    # 20201207091932_nvidia1.h5 & nvidia1 &  & 0 & 1.82 \\ \hline
+    # Log:  ../../dataset/unity/genTrack/genTrackOneLap/logs_Wed_Nov_25_23_39_22_2020 \\ \hline
+    # Filename & Model & Rain Type & Slant & gos \\ \hline
+    # 20201207091932_nvidia1.h5 & nvidia1 & light & 0 & 2.11 \\ \hline
+    # Log:  ../../dataset/unity/genTrack/genTrackOneLap/logs_Wed_Nov_25_23_39_22_2020 \\ \hline
+    # Filename & Model & Rain Type & Slant & gos \\ \hline
+    # 20201207091932_nvidia1.h5 & nvidia1 & heavy & 10 & 2.13 \\ \hline
+    # Log:  ../../dataset/unity/genTrack/genTrackOneLap/logs_Wed_Nov_25_23_39_22_2020 \\ \hline
+    # Filename & Model & Rain Type & Slant & gos \\ \hline
+    # 20201207091932_nvidia1.h5 & nvidia1 & torrential & 20 & 2.28 \\ \hline
+    #####################################################
+    # 3. nvidia_baseline Generated track
+    #####################################################
+    #modelpath = '../../trained_models/nvidia_baseline/20201207201157_nvidia_baseline.h5'
+    #modelname = 'nvidia2_baseline'
+    #rt = 'torrential'
+    #st = 20
+    #PrintLatexRowModelGOS(log, modelpath, modelname, rt, st)
+    # Log:  ../../dataset/unity/genTrack/genTrackOneLap/logs_Wed_Nov_25_23_39_22_2020 \\ \hline
+    # Filename & Model & Rain Type & Slant & gos \\ \hline
+    # 20201207201157_nvidia_baseline.h5 & nvidia2_baseline &  & 0 & 2.32 \\ \hline
+    # Log:  ../../dataset/unity/genTrack/genTrackOneLap/logs_Wed_Nov_25_23_39_22_2020 \\ \hline
+    # Filename & Model & Rain Type & Slant & gos \\ \hline
+    # 20201207201157_nvidia_baseline.h5 & nvidia2_baseline & light & 0 & 3.12 \\ \hline
+    # Log:  ../../dataset/unity/genTrack/genTrackOneLap/logs_Wed_Nov_25_23_39_22_2020 \\ \hline
+    # Filename & Model & Rain Type & Slant & gos \\ \hline
+    # 20201207201157_nvidia_baseline.h5 & nvidia2_baseline & heavy & 10 & 3.17 \\ \hline
+    # Log:  ../../dataset/unity/genTrack/genTrackOneLap/logs_Wed_Nov_25_23_39_22_2020 \\ \hline
+    # Filename & Model & Rain Type & Slant & gos \\ \hline
+    # 20201207201157_nvidia_baseline.h5 & nvidia2_baseline & torrential & 20 & 3.39 \\ \hline
+    #####################################################
+    # 4. sanity Generated track 20201120171015\_ sanity.h5
+    #####################################################
+    #modelpath = '../../trained_models/sanity/20201120171015_sanity.h5'
+    #modelname = 'nvidia1'
+    #rt = 'torrential'
+    #st = 20
+    #PrintLatexRowModelGOS(log, modelpath, modelname, rt, st)
+    # Log:  ../../dataset/unity/genTrack/genTrackOneLap/logs_Wed_Nov_25_23_39_22_2020 \\ \hline
+    # Filename & Model & Rain Type & Slant & gos \\ \hline
+    # 20201120171015_sanity.h5 & nvidia1 &  & 0 & 5.03 \\ \hline
+    # Log:  ../../dataset/unity/genTrack/genTrackOneLap/logs_Wed_Nov_25_23_39_22_2020 \\ \hline
+    # Filename & Model & Rain Type & Slant & gos \\ \hline
+    # 20201120171015_sanity.h5 & nvidia1 & light & 0 & 3.11 \\ \hline
+    # Log:  ../../dataset/unity/genTrack/genTrackOneLap/logs_Wed_Nov_25_23_39_22_2020 \\ \hline
+    # Filename & Model & Rain Type & Slant & gos \\ \hline
+    # 20201120171015_sanity.h5 & nvidia1 & heavy & 10 & 3.07 \\ \hline
+    # Log:  ../../dataset/unity/genTrack/genTrackOneLap/logs_Wed_Nov_25_23_39_22_2020 \\ \hline
+    # Filename & Model & Rain Type & Slant & gos \\ \hline
+    # 20201120171015_sanity.h5 & nvidia1 & torrential & 20 & 3.00 \\ \hline
+
+    ############################################
+    # 5. nvidia2 Generated Road
+    ############################################
+    log = '../../dataset/unity/genRoad/logs_Fri_Jul_10_09_16_18_2020/*.jpg'
+    #modelpath = '../../trained_models/nvidia2/20201207192948_nvidia2.h5'
+    #modelname = 'nvidia2'
+    #rt = 'torrential'
+    #st = 20
+    #PrintLatexRowModelGOS(log, modelpath, modelname, rt, st)
+    # Log:  ../../dataset/unity/genRoad/logs_Fri_Jul_10_09_16_18_2020 \\ \hline
+    # Filename & Model & Rain Type & Slant & gos \\ \hline
+    # 20201207192948_nvidia2.h5 & nvidia2 &  & 0 & 2.99 \\ \hline # drove 16 minutes on this road https://youtu.be/z9nILq9dQfI
+    # Log:  ../../dataset/unity/genRoad/logs_Fri_Jul_10_09_16_18_2020 \\ \hline
+    # Filename & Model & Rain Type & Slant & gos \\ \hline
+    # 20201207192948_nvidia2.h5 & nvidia2 & light & 0 & 3.20 \\ \hline
+    # Log:  ../../dataset/unity/genRoad/logs_Fri_Jul_10_09_16_18_2020 \\ \hline
+    # Filename & Model & Rain Type & Slant & gos \\ \hline
+    # 20201207192948_nvidia2.h5 & nvidia2 & heavy & 10 & 3.22 \\ \hline
+    # Log:  ../../dataset/unity/genRoad/logs_Fri_Jul_10_09_16_18_2020 \\ \hline
+    # Filename & Model & Rain Type & Slant & gos \\ \hline
+    # 20201207192948_nvidia2.h5 & nvidia2 & torrential & 20 & 3.27 \\ \hline
+    #####################################################
+    # 6. nvidia1 Generated Road
+    #####################################################
+    #modelpath = '../../trained_models/nvidia1/20201207091932_nvidia1.h5'
+    #modelname = 'nvidia1'
+    # rt = 'torrential'
+    # st = 20
+    # PrintLatexRowModelGOS(log, modelpath, modelname, rt, st)
+    # Log:  ../../dataset/unity/genRoad/logs_Fri_Jul_10_09_16_18_2020 \\ \hline
+    # Filename & Model & Rain Type & Slant & gos \\ \hline
+    # 20201207091932_nvidia1.h5 & nvidia1 &  & 0 & 3.87 \\ \hline
+    # Log:  ../../dataset/unity/genRoad/logs_Fri_Jul_10_09_16_18_2020 \\ \hline
+    # Filename & Model & Rain Type & Slant & gos \\ \hline
+    # 20201207091932_nvidia1.h5 & nvidia1 & light & 0 & 3.75 \\ \hline
+    # Log:  ../../dataset/unity/genRoad/logs_Fri_Jul_10_09_16_18_2020 \\ \hline
+    # Filename & Model & Rain Type & Slant & gos \\ \hline
+    # 20201207091932_nvidia1.h5 & nvidia1 & heavy & 10 & 3.70 \\ \hline
+    # Log:  ../../dataset/unity/genRoad/logs_Fri_Jul_10_09_16_18_2020 \\ \hline
+    # Filename & Model & Rain Type & Slant & gos \\ \hline
+    # 20201207091932_nvidia1.h5 & nvidia1 & torrential & 20 & 3.57 \\ \hline
+
+    #####################################################
+    # 7. nvidia_baseline Generated Road
+    #####################################################
+    #modelpath = '../../trained_models/nvidia_baseline/20201207201157_nvidia_baseline.h5'
+    #modelname = 'nvidia2_baseline'
+    #rt = 'torrential'
+    #st = 20
+    #PrintLatexRowModelGOS(log, modelpath, modelname, rt, st)
+    # Log:  ../../dataset/unity/genRoad/logs_Fri_Jul_10_09_16_18_2020 \\ \hline
+    # Filename & Model & Rain Type & Slant & gos \\ \hline
+    # 20201207201157_nvidia_baseline.h5 & nvidia2_baseline &  & 0 & 5.51 \\ \hline
+    # Log:  ../../dataset/unity/genRoad/logs_Fri_Jul_10_09_16_18_2020 \\ \hline
+    # Filename & Model & Rain Type & Slant & gos \\ \hline
+    # 20201207201157_nvidia_baseline.h5 & nvidia2_baseline & light & 0 & 4.97 \\ \hline
+    # Log:  ../../dataset/unity/genRoad/logs_Fri_Jul_10_09_16_18_2020 \\ \hline
+    # Filename & Model & Rain Type & Slant & gos \\ \hline
+    # 20201207201157_nvidia_baseline.h5 & nvidia2_baseline & heavy & 10 & 4.98 \\ \hline
+    # Log:  ../../dataset/unity/genRoad/logs_Fri_Jul_10_09_16_18_2020 \\ \hline
+    # Filename & Model & Rain Type & Slant & gos \\ \hline
+    # 20201207201157_nvidia_baseline.h5 & nvidia2_baseline & torrential & 20 & 5.05 \\ \hline
+    #####################################################
+    # 8. sanity Generated track 20201120171015\_ sanity.h5
+    #####################################################
+    modelpath = '../../trained_models/sanity/20201120171015_sanity.h5'
+    modelname = 'nvidia1'
+    rt = 'torrential'
+    st = 20
+    PrintLatexRowModelGOS(log, modelpath, modelname, rt, st)
+    # Log:  ../../dataset/unity/genRoad/logs_Fri_Jul_10_09_16_18_2020 \\ \hline
+    # Filename & Model & Rain Type & Slant & gos \\ \hline
+    # 20201120171015_sanity.h5 & nvidia1 &  & 0 & 3.85 \\ \hline
+    # Log:  ../../dataset/unity/genRoad/logs_Fri_Jul_10_09_16_18_2020 \\ \hline
+    # Filename & Model & Rain Type & Slant & gos \\ \hline
+    # 20201120171015_sanity.h5 & nvidia1 & light & 0 & 3.06 \\ \hline
+    # Log:  ../../dataset/unity/genRoad/logs_Fri_Jul_10_09_16_18_2020 \\ \hline
+    # Filename & Model & Rain Type & Slant & gos \\ \hline
+    # 20201120171015_sanity.h5 & nvidia1 & heavy & 10 & 3.05 \\ \hline
+    # Log:  ../../dataset/unity/genRoad/logs_Fri_Jul_10_09_16_18_2020 \\ \hline
+    # Filename & Model & Rain Type & Slant & gos \\ \hline
+    # 20201120171015_sanity.h5 & nvidia1 & torrential & 20 & 3.02 \\ \hline
+
+def printMultiPlots(model1_nvidia2, model2_nvidia1, model3_nvidia_baseline, model4_sanity):
+    """
+    Print multiple plots to reference first 16 results in Goodness of steer tables
+    Inputs
+     model1_nvidia2, model2_nvidia1, model3_nvidia_baseline, model4_sanity: the required keras models
+    """
+    # define log
+    log = '../../dataset/unity/genTrack/genTrackOneLap/logs_Wed_Nov_25_23_39_22_2020/*.jpg'
+    # Get ground truth values
+    gt = GetJSONSteeringAngles(log)
+    gt = np.asarray(gt)
+    # get predictions
+    ############################################
+    # 1. nvidia2 Generated track
+    ############################################
+    # 1.1 dry
+    sa = GetPredictedSteeringAngles(log, model1_nvidia2, 'nvidia2', rt='', st=0)
+    # STOPPED HERE
+    # get array, define label x4 and plot, repeat x4 for all models, note probably double size of plot (18x6)
+    
 if __name__ == "__main__":
     # plot_hist("/home/simbox/git/sdsandbox/trained_models/nvidia1/20201107144927_nvidia1.history")
 #if __name__ == "__main__":
 #    parser = argparse.ArgumentParser(description='Plot Steering Utils')
 #    parser.add_argument('--inputs', type=str, help='file path')
 
-    #args = parser.parse_args()
+    # args = parser.parse_args()
     #svals = jsonSteeringBins('~/git/msc-data/unity/genRoad/*.jpg', 'genRoad')
 
+    # PrintLatexRowModelGOS('../../dataset/unity/genTrack/genTrackOneLap/logs_Wed_Nov_25_23_39_22_2020/*.jpg', '../../trained_models/nvidia2/20201207192948_nvidia2.h5', 'nvidia2')
+    # printGOSRows()
+    # load models
+    model1_nvidia2 = ''
+    model2_nvidia1 = ''
+    model3_nvidia_baseline = ''
+    model4_sanity = ''
+    # modelpath = '../../trained_models/sanity/20201120171015_sanity.h5'
+    # modelpath = '../../trained_models/nvidia_baseline/20201207201157_nvidia_baseline.h5'
+    #modelpath = '../../trained_models/nvidia1/20201207091932_nvidia1.h5'
+    # modelpath = '../../trained_models/nvidia2/20201207192948_nvidia2.h5'
+    # assume model is loaded and compiled
+    # nvidia2
+    modelpath = '../../trained_models/nvidia2/20201207192948_nvidia2.h5'
+    model1_nvidia2 = load_model(modelpath)
+    model1_nvidia2.compile("sgd", "mse")
+    # nvidia1
+    modelpath = '../../trained_models/nvidia1/20201207091932_nvidia1.h5'
+    model2_nvidia1 = load_model(modelpath)
+    model2_nvidia1.compile("sgd", "mse")
+    # nvidia_baseline
+    modelpath = '../../trained_models/nvidia_baseline/20201207201157_nvidia_baseline.h5'
+    model3_nvidia_baseline = load_model(modelpath)
+    model3_nvidia_baseline.compile("sgd", "mse")
+    # sanity
+    modelpath = '../../trained_models/sanity/20201120171015_sanity.h5'
+    model4_sanity = load_model(modelpath)
+    model4_sanity.compile("sgd", "mse")
 
-    path = 'record_11640.json'
-    js = load_json(path)
-    print(js)
+    printMultiPlots(model1_nvidia2, model2_nvidia1, model3_nvidia_baseline, model4_sanity)
+
+    #path = 'record_11640.json'
+    #js = load_json(path)
+    #print(js)
     # plotSteeringAngles(p, None, 25, True, "Generated Track", "20201120171015_sanity.h5", 'tcpflow log predicted')
     # plots1()

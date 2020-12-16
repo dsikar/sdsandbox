@@ -38,7 +38,7 @@ IMG_BOTTOM_CROP_IDX = 6
 ALEXNET = 'alexnet'
 alexnet_img_dims = [224,224,3,224,224,60,-25]
 # NVIDIA1
-NVIDIA1 = 'nvidia1' # a.k.a. TawnNet
+NVIDIA1 = 'nvidia1' # a.k.a. TawnNe,
 nvidia1_img_dims = [160,120,3,160,120,60,-25]
 # NVIDIA2
 NVIDIA2 = 'nvidia2' # a.k.a. NaokiNet

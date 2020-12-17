@@ -259,7 +259,7 @@ def plotSteeringAngles(p, g=None, n=1, save=False, track= "Track Name", mname="m
     # if need be
     return plt
 
-def plotMultipleSteeringAngles(p, n=25, save=False, track="Track Name", mname="model name", title='title', w=18, h=4):
+def plotMultipleSteeringAngles(p, n=25, save=False, track="Track Name", mname="model name", title='title', w=18, h=3):
     """
     Plot multiple predicted and (TODO) optionally ground truth steering angles
     Inputs
@@ -472,7 +472,7 @@ def GetPredictedSteeringAngles(filemask, model, modelname, rt='', st=0):
     ag = Augmentation.Augmentation(modelname)
 
     # load model
-    print("loading model", modelpath)
+    # print("loading model", modelpath)
     # assume model is loaded and compiled
     # model = load_model(modelpath)
 
@@ -486,6 +486,8 @@ def GetPredictedSteeringAngles(filemask, model, modelname, rt='', st=0):
         for filename in fnmatch.filter(filenames, mask):
             matches.append(os.path.join(root, filename))
 
+    # sort by create date
+    matches = sorted(matches, key=os.path.getmtime)
     # steering values
     svals = []
     for fullpath in matches:
@@ -697,6 +699,8 @@ def printMultiPlots(model1_nvidia2, model2_nvidia1, model3_nvidia_baseline, mode
     Inputs
      model1_nvidia2, model2_nvidia1, model3_nvidia_baseline, model4_sanity: the required keras models
     """
+    # init plot list
+    plot_list = []
     # define log
     log = '../../dataset/unity/genTrack/genTrackOneLap/logs_Wed_Nov_25_23_39_22_2020/*.jpg'
     # Get ground truth values
@@ -707,10 +711,133 @@ def printMultiPlots(model1_nvidia2, model2_nvidia1, model3_nvidia_baseline, mode
     # 1. nvidia2 Generated track
     ############################################
     # 1.1 dry
+    """
+    print('Predicting nvidia2 dry...')
     sa = GetPredictedSteeringAngles(log, model1_nvidia2, 'nvidia2', rt='', st=0)
-    # STOPPED HERE
-    # get array, define label x4 and plot, repeat x4 for all models, note probably double size of plot (18x6)
-    
+    sarr = np.asarray(sa)
+    p = sarr[:,0]
+    g = sarr[:, 1]
+    plot_list.append([g, 'ground truth'])
+    plot_list.append([p, 'prediction - no rain'])
+    # 1.2 light rain
+    print('Predicting nvidia2 light rain...')
+    sa = GetPredictedSteeringAngles(log, model1_nvidia2, 'nvidia2', rt='light', st=0)
+    sarr = np.asarray(sa);
+    p = sarr[:,0]
+    plot_list.append([p, 'prediction - light rain'])
+    # 1.3 heavy rain, slant = +-10
+    print('Predicting nvidia2 heavy rain...')
+    sa = GetPredictedSteeringAngles(log, model1_nvidia2, 'nvidia2', rt='heavy', st=10)
+    p = sarr[:,0]
+    plot_list.append([p, 'prediction - heavy rain +-10'])
+    # 1.4 torrential rain, slant = +-20
+    print('Predicting nvidia2 torrential rain...')
+    sa = GetPredictedSteeringAngles(log, model1_nvidia2, 'nvidia2', rt='torrential', st=20)
+    sarr = np.asarray(sa);
+    p = sarr[:,0]
+    plot_list.append([p, 'prediction - torrential rain +-20'])
+    print('Plotting...')
+    plotMultipleSteeringAngles(plot_list, 25, True, "Generated_Track", "20201207192948_nvidia2.h5", title='SDSandbox log genTrackOneLap/logs_Wed_Nov_25_23_39_22_2020', w=18, h=4)
+    """
+    ############################################
+    # 2. nvidia1 Generated track
+    ############################################
+    # 2.1 dry
+    print('Predicting nvidia1 dry...')
+    sa = GetPredictedSteeringAngles(log, model2_nvidia1, 'nvidia1', rt='', st=0)
+    sarr = np.asarray(sa);
+    p = sarr[:,0]
+    g = sarr[:, 1]
+    plot_list.append([g, 'ground truth'])
+    plot_list.append([p, 'prediction - no rain'])
+    # 2.2 light rain
+    print('Predicting nvidia1 light rain...')
+    sa = GetPredictedSteeringAngles(log, model2_nvidia1, 'nvidia1', rt='light', st=0)
+    sarr = np.asarray(sa);
+    p = sarr[:,0]
+    plot_list.append([p, 'prediction - light rain'])
+    # 2.3 heavy rain, slant = +-10
+    print('Predicting nvidia1 heavy rain...')
+    sa = GetPredictedSteeringAngles(log, model2_nvidia1, 'nvidia1', rt='heavy', st=10)
+    sarr = np.asarray(sa);
+    p = sarr[:,0]
+    plot_list.append([p, 'prediction - heavy rain +-10'])
+    # 2.4 torrential rain, slant = +-20
+    print('Predicting nvidia1 torrential rain...')
+    sa = GetPredictedSteeringAngles(log, model2_nvidia1, 'nvidia1', rt='torrential', st=20)
+    sarr = np.asarray(sa);
+    p = sarr[:,0]
+    plot_list.append([p, 'prediction - torrential rain +-20'])
+    print('Plotting...')
+    plotMultipleSteeringAngles(plot_list, 25, True, "Generated_Track", "20201207091932_nvidia1.h5", title='SDSandbox log genTrackOneLap/logs_Wed_Nov_25_23_39_22_2020', w=18, h=4)
+
+    ############################################
+    # 3. nvidia_baseline Generated track
+    ############################################
+    # 3.1 dry
+    """
+    print('Predicting model3_nvidia_baseline dry...')
+    sa = GetPredictedSteeringAngles(log, model3_nvidia_baseline, 'nvidia1', rt='', st=0)
+    sarr = np.asarray(sa);
+    p = sarr[:,0]
+    g = sarr[:, 1]
+    plot_list.append([g, 'ground truth'])
+    plot_list.append([p, 'prediction - no rain'])
+    # 3.2 light rain
+    print('Predicting model3_nvidia_baseline light rain...')
+    sa = GetPredictedSteeringAngles(log, model3_nvidia_baseline, 'nvidia1', rt='light', st=0)
+    sarr = np.asarray(sa);
+    p = sarr[:,0]
+    plot_list.append([p, 'prediction - light rain'])
+    # 3.3 heavy rain, slant = +-10
+    print('Predicting model3_nvidia_baseline heavy rain...')
+    sa = GetPredictedSteeringAngles(log, model3_nvidia_baseline, 'nvidia1', rt='heavy', st=10)
+    sarr = np.asarray(sa);
+    p = sarr[:,0]
+    plot_list.append([p, 'prediction - heavy rain +-10'])
+    # 3.4 torrential rain, slant = +-20
+    print('Predicting model3_nvidia_baseline torrential rain...')
+    sa = GetPredictedSteeringAngles(log, model3_nvidia_baseline, 'nvidia1', rt='torrential', st=20)
+    sarr = np.asarray(sa);
+    p = sarr[:,0]
+    plot_list.append([p, 'prediction - torrential rain +-20'])
+    print('Plotting...')
+    plotMultipleSteeringAngles(plot_list, 25, True, "Generated_Track", "20201207201157_nvidia_baseline.h5", title='SDSandbox log genTrackOneLap/logs_Wed_Nov_25_23_39_22_2020', w=18, h=3)
+    """
+
+    """ 
+    ############################################
+    # 4. sanity Generated track
+    ############################################
+    # 4.1 dry
+    print('Predicting model4_sanity dry...')
+    sa = GetPredictedSteeringAngles(log, model4_sanity, 'nvidia1', rt='', st=0)
+    sarr = np.asarray(sa);
+    p = sarr[:,0]
+    g = sarr[:, 1]
+    plot_list.append([g, 'ground truth'])
+    plot_list.append([p, 'prediction - no rain'])
+    # 4.2 light rain
+    print('Predicting model4_sanity light rain...')
+    sa = GetPredictedSteeringAngles(log, model4_sanity, 'nvidia1', rt='light', st=0)
+    sarr = np.asarray(sa);
+    p = sarr[:,0]
+    plot_list.append([p, 'prediction - light rain'])
+    # 4.3 heavy rain, slant = +-10
+    print('Predicting model4_sanity heavy rain...')
+    sa = GetPredictedSteeringAngles(log, model4_sanity, 'nvidia1', rt='heavy', st=10)
+    sarr = np.asarray(sa);
+    p = sarr[:,0]
+    plot_list.append([p, 'prediction - heavy rain +-10'])
+    # 4.4 torrential rain, slant = +-20
+    print('Predicting model4_sanity torrential rain...')
+    sa = GetPredictedSteeringAngles(log, model4_sanity, 'nvidia1', rt='torrential', st=20)
+    sarr = np.asarray(sa);
+    p = sarr[:,0]
+    plot_list.append([p, 'prediction - torrential rain +-20'])
+    print('Plotting...')
+    plotMultipleSteeringAngles(plot_list, 25, True, "Generated_Track", "20201120171015_sanity.h5", title='SDSandbox log genTrackOneLap/logs_Wed_Nov_25_23_39_22_2020', w=18, h=3)
+    """
 if __name__ == "__main__":
     # plot_hist("/home/simbox/git/sdsandbox/trained_models/nvidia1/20201107144927_nvidia1.history")
 #if __name__ == "__main__":

@@ -2,6 +2,7 @@
 
 This is the accompanying code for "Evaluation of Self-Driving Cars Using CNNs In The Rain". Unity game engine is used as a simulation environment, a modified SDSandbox is the Unity wrapper, a modified Automold is used to add rain to images. Data augmetation was done with a modified version of [this repo](https://github.com/naokishibuya/car-behavioral-cloning)
 
+All training and testing was done on Ubuntu 18.04 and 16.04 environments.
 
 Some modfications were made to the original source code such that:
 
@@ -9,7 +10,7 @@ Some modfications were made to the original source code such that:
 
 2. Added rain, using the [Automold](https://github.com/UjjwalSaxena/Automold--Road-Augmentation-Library) library
 
-3. Data Augmentation, crops were adjusted such that road geometry of interest are taken from SDSandbox Unity camera image. Original crop correspons to Udacity MOOC Unity wrapper, with a different aspect ratio.
+3. Data Augmentation, crops were adjusted such that road geometry of interest are taken from SDSandbox Unity camera image. Original crop corresponds to Udacity MOOC Unity wrapper, with a different self-driving vehicle camera aspect ratio.
 
 ## Running the code
 
@@ -18,10 +19,13 @@ Clone this repo:
 ```
 $ git clone https://github.com/dsikar/sdsandbox
 ```
-Download trained models:
+Download trained models and unpack inside repo directory, such that it is on same level as src directory:
 ```
 $ wget https://bit.ly/39jfp8y
 ```
+
+At this point, jump down to the original SDSandbox, follow steps and make sure the Unity engine is running ok, then continue from here.
+
 Start Unity and choose option "Generated Track"
 
 ![SDSandbox](https://user-images.githubusercontent.com/232522/135420165-a135c508-a836-450b-ac82-cd24673e3f9b.png)
@@ -30,17 +34,32 @@ Choose option "NN Control Over Network"
 
 ![SDSandboxAutoRecNN](https://user-images.githubusercontent.com/232522/135420531-9d7d5bdd-c0c8-471a-a04d-8358d65c5fa3.png)
 
-In a terminal, navigate to the src directory. Start tcpflow to log the run:
+In a terminal, start tcpflow to log the run:
 
 ```
-$ $ sudo tcpflow -i lo -c port 9091 > /tmp/20201207192948_nvidia2_light_rain_mult_1_tcpflow.log
+$ sudo tcpflow -i lo -c port 9091 > /tmp/20201207192948_nvidia2_light_rain_mult_1_tcpflow.log
 ```
 
+In another terminal, navigate to the src directory and start the prediction engine, adding rain (light in this example:
+
+```
+$ python predict_client.py \
+--model=../trained_models/nvidia2/20201207192948_nvidia2.h5 --modelname=nvidia2 \ 
+--record=True --rain='light' slant=0
+```
+
+At this point there should be one screen and 2 terminals:
+
+![SimTCPPred](https://user-images.githubusercontent.com/232522/135422760-39108d43-e838-4d87-97a4-e581e9b78101.png)
+
+where the left screen is the Unity SDSandbox, tcpflow is the middle terminal and the prediction engine is the right terminal. Note tcpflow is used for debugging, the switch *--record=True"* will save a video with the original, added rain and network (as in presented to the network) images.
+
+![youtube20201207192948_nvidia2torrential20mult_8_h5](https://user-images.githubusercontent.com/232522/135424431-3e37fec7-d982-4bc0-89df-a04e939906ba.png)
+
+https://youtu.be/zk6XalCoOrw
 
 
-
-
-# Original SDSandbox README ()
+# Original SDSandbox README 
 
 Self Driving Car Sandbox
 

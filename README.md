@@ -1,4 +1,46 @@
-# SdSandbox
+# SdSandbox + Rain
+
+This is the accompanying code for "Evaluation of Self-Driving Cars Using CNNs In The Rain". Unity game engine is used as a simulation environment, a modified SDSandbox is the Unity wrapper, a modified Automold is used to add rain to images. Data augmetation was done with a modified version of [this repo](https://github.com/naokishibuya/car-behavioral-cloning)
+
+
+Some modfications were made to the original source code such that:
+
+1. Trained model can actually self-drive - changes to network geometry and image pre-processing
+
+2. Added rain, using the [Automold](https://github.com/UjjwalSaxena/Automold--Road-Augmentation-Library) library
+
+3. Data Augmentation, crops were adjusted such that road geometry of interest are taken from SDSandbox Unity camera image. Original crop correspons to Udacity MOOC Unity wrapper, with a different aspect ratio.
+
+## Running the code
+
+Clone this repo:
+
+```
+$ git clone https://github.com/dsikar/sdsandbox
+```
+Download trained models:
+```
+$ wget https://bit.ly/39jfp8y
+```
+Start Unity and choose option "Generated Track"
+
+![SDSandbox](https://user-images.githubusercontent.com/232522/135420165-a135c508-a836-450b-ac82-cd24673e3f9b.png)
+
+Choose option "NN Control Over Network"
+
+![SDSandboxAutoRecNN](https://user-images.githubusercontent.com/232522/135420531-9d7d5bdd-c0c8-471a-a04d-8358d65c5fa3.png)
+
+In a terminal, navigate to the src directory. Start tcpflow to log the run:
+
+```
+$ $ sudo tcpflow -i lo -c port 9091 > /tmp/20201207192948_nvidia2_light_rain_mult_1_tcpflow.log
+```
+
+
+
+
+
+# Original SDSandbox README ()
 
 Self Driving Car Sandbox
 

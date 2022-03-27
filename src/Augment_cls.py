@@ -8,6 +8,8 @@ import cv2, os
 import numpy as np
 import matplotlib.image as mpimg
 import conf
+import Automold as am
+import Helpers as hp
 
 class Augment_cls():
   """
@@ -44,6 +46,32 @@ class Augment_cls():
       # default to nvidia1
       return conf.nvidia1_img_dims
     
+  def add_rain(self, image_arr, rt=None, st=0):
+        """
+        Add rain to image
+        Inputs:
+            image_arr: numpy array containing image
+            rt: string, rain type "heavy" or "torrential"
+            st: range to draw a random slant from
+        Output
+            image_arr: numpy array containing image with rain
+        Example
+        TODO
+        Maybe this should kept is a separate class? We are adding noise in this case.
+        """
+        # print("Adding rain...")
+        if(st != 0):
+            # draw a random number for slant
+            st = np.random.randint(-1 * st, st)
+
+        if(rt!='light'): # heavy or torrential
+            image_arr = am.add_rain_single(image_arr, rain_type=rt, slant=st)
+        else:
+             # no slant
+            image_arr = am.add_rain_single(image_arr)
+
+        return image_arr    
+    
   def load_image(self, image_path):
     """
     Load RGB images from a file
@@ -79,6 +107,12 @@ class Augment_cls():
   def preprocess(self, image):
     """
     Combine all preprocess functions into one
+    Input
+        self, instance of the class
+        image: numpy array of image
+    Output
+        image
+    Example 
     """
     image = self.crop(image)
     image = self.resize(image)

@@ -2,7 +2,7 @@
 Predict Server
 Create a server to accept image inputs and run them against a trained neural network.
 This then sends the steering output back to the client.
-Author: Tawn Kramer
+Author: Tawn Kramer, modified by D. Sikar
 '''
 from __future__ import print_function
 import os
@@ -22,12 +22,12 @@ import numpy as np
 from gym_donkeycar.core.fps import FPSTimer
 from gym_donkeycar.core.message import IMesgHandler
 from gym_donkeycar.core.sim_client import SimClient
-# same preprocess as for training
-from augmentation import augment, preprocess
+# same preprocess as for training, using Augment_cls
+# from augmentation import augment, preprocess
 import conf
 from helper_functions import parse_bool
 import utils.RecordVideo as RecordVideo
-import Augmentation
+import Augment_cls as Augmentation
 
 
 if tf.__version__ == '1.13.1':
@@ -320,7 +320,7 @@ if __name__ == "__main__":
     conf.st = args.slant
     conf.record = args.record
 
-    ag = Augmentation.Augmentation(args.modelname)
+    ag = Augmentation.Augment_cls(args.modelname)
 
     if conf.record == True:
         print("*** When finished, press CTRL+C and y to finish recording, then CTRL+C to quit ***")

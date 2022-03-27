@@ -1,5 +1,5 @@
 ##################################################
-# 2. Augmentation.py
+# 2. Augment_cls.py
 # Note: code modified from original in
 # https://github.com/naokishibuya/car-behavioral-cloning/blob/master/utils.py
 # Available for audit in audit_files/naoki from sharepoint link
@@ -9,7 +9,7 @@ import numpy as np
 import matplotlib.image as mpimg
 import conf
 
-class Augmentation():
+class Augment_cls():
   """
   Augmentation methods
   """

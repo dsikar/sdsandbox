@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-# In[136]:
+# In[40]:
 
 
 def sort_unity_files(path, mask):
@@ -10,30 +10,29 @@ def sort_unity_files(path, mask):
     C:\\Users\\aczd097\\Downloads\\dataset\\unity\\log_sample\\logs_Mon_Jul_13_08_29_01_2020\\0_cam-image_array_.jpg
     Where the key in example above is 0 (first characters before underscore in 0_cam-image_array_.jpg)
     
-    --------
+    Parameters
+    ----------
+    path : string
+        path to files
+    mask : string
+        file type
     
-    Input:
-        path, string, path to files
-        mask, string, file type
-    
-    -------
-    
-    Output:
+    Returns
+    -------    
+        fdict: dictionary
         Sorted dictionary containing key and file path
-    
-    -------
-            
-    Example:
+             
+    Example
+    -------    
     path = 'C:\\Users\\aczd097\\Downloads\\dataset\\unity\\log_sample\\logs_Mon_Jul_13_08_29_01_2020\\'
     mask = '*.jpg'
     fdict = sort_unity_files(path, mask)
     for key in sorted(fdict):
         print("key: {}, value:{}".format(key,fdict[key]))
-    
-    -------
        
-    Notes:
-    File path format is OS dependant, OrderedDict must by sorted to order files in the right order.
+    Note
+    -------    
+    File path format is OS dependant. OrderedDict must by sorted to order files in the right order.
     """
     
     import fnmatch
@@ -54,23 +53,68 @@ def sort_unity_files(path, mask):
     return fdict
 
 
-# In[145]:
+# In[41]:
 
 
-def plot_img_hist(img):
+def overlay_imgs(s_img, l_img, x_offset=50, y_offset=50):
+    """
+    Overlay two numpy array images
+    
+    Parameters
+    ----------
+        s_img: numpy array, small image
+        l_img: numpy array, large image
+        x_offset: left padding from large to small overlaid image
+        y_offset: top padding from large to small overlaid image
+        
+    Returns
+    -------
+        image_arr: numpy array containing large image with insert 
+        of small image inlaid
+        
+    Example
+    --------
+    
+    
+    """
+    l_img[y_offset:y_offset+s_img.shape[0], x_offset:x_offset+s_img.shape[1]] = s_img
+    return l_img
+
+
+# In[42]:
+
+
+def plot_img_hist(img, scheme='rgb'):
     """
     Plot histogram for an rgb array
     
-    ====
-    
-    Input:
+    Parameters
+    -------    
         img: numpy array
-    Output:
-        None
+        scheme: string, 'rgb' (default) or , 'yuv-rgb'
+        If scheme is rgb, maximum number of values in a bins is expected to 3 digit, otherwise
+        6 digits and y-axys is plotted on log scale.
+    
+    Returns
+    -------    
+        fig: matplotlib.pyplot figure
+    
+    Example
+    -------  
+    import cv2
+    import numpy as np
+    import matplotlib.pyplot as plt
+    ipath = 'C:\\Users\\aczd097\\Downloads\\dataset\\unity\\log_sample\\logs_Mon_Jul_13_08_29_01_2020\\12893_cam-image_array_.jpg'
+    img1 = cv2.imread(ipath) # 120x160x3
+    plt.rcParams["figure.figsize"] = (6,4)
+    myfig = plot_img_hist(img)
     """
     # from https://discuss.pytorch.org/t/plot-a-histogram-for-multiple-images-full-dataset/67600
     # https://jakevdp.github.io/blog/2013/12/01/kernel-density-estimation/
     from PIL import Image
+    import numpy as np
+    import matplotlib.pyplot as plt
+    
     nb_bins = 256
     count_r = np.zeros(nb_bins)
     count_g = np.zeros(nb_bins)
@@ -97,17 +141,7 @@ def plot_img_hist(img):
     return fig
 
 
-# In[72]:
-
-
-path = 'C:\\Users\\aczd097\\Downloads\\dataset\\unity\\log_sample\\logs_Mon_Jul_13_08_29_01_2020\\'
-mask = '*.jpg'
-fdict = sort_unity_files(path, mask)
-for key in sorted(fdict):
-    print("key: {}, value:{}".format(key,fdict[key]))
-
-
-# In[161]:
+# In[43]:
 
 
 # fpath = fdict[key]
@@ -121,16 +155,16 @@ def get_sdsandbox_json_steer_angle(fpath):
     The json file with with steering angle, in the same path, will be named record_12893.json
     We open that file and return the steering angle.
     
-    =======
-    
-    Input:
+    Parameters
+    -------   
         fpath: string, filepath
-    Output:
-        st_angle: steering angle
-        
-    =======
     
-    Example:
+    Returns
+    -------  
+        st_angle: steering angle
+    
+    Example
+    ------- 
     fpath = 'C:\\Users\\aczd097\\Downloads\\dataset\\unity\\log_sample\\logs_Mon_Jul_13_08_29_01_2020\\12893_cam-image_array_.jpg'
     jsa = get_sdsandbox_json_steer_angle(fpath)
     print(jsa)
@@ -158,76 +192,103 @@ def get_sdsandbox_json_steer_angle(fpath):
     st_angle = fjson['user/angle']
     return st_angle
     
-# fpath = 'C:\\Users\\aczd097\\Downloads\\dataset\\unity\\log_sample\\logs_Mon_Jul_13_08_29_01_2020\\12893_cam-image_array_.jpg'
-# jsa = get_sdsandbox_json_steer_angle(fpath)
-# print(jsa)  
-
-import cv2
-import numpy as np
-import matplotlib.pyplot as plt
-ipath = 'C:\\Users\\aczd097\\Downloads\\dataset\\unity\\log_sample\\logs_Mon_Jul_13_08_29_01_2020\\12893_cam-image_array_.jpg'
-img = cv2.imread(ipath) # 120x160x3
-# resize so we can write some info onto image
-#img = cv2.resize(img, (800, 600), cv2.INTER_AREA)
-plt.imshow(img)
-plt.rcParams["figure.figsize"] = (6,4)
-myfig = plot_img_hist(img)
-myfig.savefig("temp_plot.png")
-img2 = cv2.imread("temp_plot.png")
-img3 = overlay_imgs(img2, img1)
-plt.close(myfig)
 
 
-# # Overlay images
-
-# In[165]:
+# In[ ]:
 
 
-img2 = cv2.imread("temp_plot.png")
-img3 = overlay_imgs(img2, img1)
-plt.imshow(img3)
+def overlay_imgs(s_img, l_img, x_offset=50, y_offset=50):
+    """
+    Overlay two numpy array images
+    
+    Parameters
+    ----------
+        s_img: numpy array, small image
+        l_img: numpy array, large image
+        x_offset: left padding from large to small overlaid image
+        y_offset: top padding from large to small overlaid image
+        
+    Returns
+    -------
+        image_arr: numpy array containing large image with insert 
+        of small image inlaid
+        
+    Example
+    --------
+    
+    
+    """
+    #import cv2
+    #s_img = cv2.imread("smaller_image.png")
+    #l_img = cv2.imread("larger_image.jpg")
+    # x_offset=y_offset=50
+    l_img[y_offset:y_offset+s_img.shape[0], x_offset:x_offset+s_img.shape[1]] = s_img
+    return l_img
 
 
-# In[147]:
+# In[ ]:
 
 
-type(np.asarray(myfig)
+# TODO, need to bring this from existing module
+def add_rain(image_arr, rt=None, st=0):
+    """
+    Add rain to image
+    
+    Parameters
+    ----------
+        image_arr: numpy array containing image
+        rt: string, rain type "heavy" or "torrential"
+        st: range to draw a random slant from
+        
+    Returns
+    -------
+        image_arr: numpy array containing image with rain
+        
+    Example
+    --------
+    
+    """
+    import Automold as am
+    
+    # print("Adding rain...")
+    if(st != 0):
+        # draw a random number for slant
+        st = np.random.randint(-1 * st, st)
+
+    if(rt!='light'): # heavy or torrential
+        image_arr = am.add_rain_single(image_arr, rain_type=rt, slant=st)
+    else:
+         # no slant
+        image_arr = am.add_rain_single(image_arr)
+
+    return image_arr
 
 
-# In[168]:
+# In[52]:
 
 
-# TODO Finish writing this function, looping through fdict instead of current scheme
-# Goods-to-have plot RGB distribution on the video as it goes along
 def make_video(fdict, model, preproc=False):
     """
     Make video from image dictionary.
     video.avi is written to disk
     
-    -------
-    
-    Inputs
+    Parameters
+    -------    
         fdict: collections.OrderedDict, ordered dictionary of file names
         model: string, model name
         preproc: boolean, show preprocessed image next to original
-        
-    -------
     
-    Output
+    Returns
         none
     
-    -------
-    
     Example
-
+    -------
     path = 'C:\\Users\\aczd097\\Downloads\\dataset\\unity\\log_sample\\logs_Mon_Jul_13_08_29_01_2020\\'
     mask = '*.jpg'
     fdict = sort_unity_files(path, mask)
     
     model = 'nvidia2'
-    make_video(fdict, model, True) # saved as nvidia2.avi
-    
-    
+    make_video(fdict, model, True) # saved as nvidia2.avi 
     """
     
     import os
@@ -271,19 +332,11 @@ def make_video(fdict, model, preproc=False):
 
             image = cv2.imread(fdict[key]) # 120x160x3
             # get histogram
-            myfig = plot_img_hist(image)
+            myfig = plot_img_hist(image, 'rgb')
             myfig.savefig("temp_plot.png")
             image2 = cv2.imread("temp_plot.png")
             # save
-            plt.close(myfig) 
-            
-            #plt.imshow(img)
-            #plt.rcParams["figure.figsize"] = (6,4)
-            #myfig = plot_img_hist(img)
-            #myfig.savefig("temp_plot.png")
-            #img2 = cv2.imread("temp_plot.png")
-            #img3 = overlay_imgs(img2, img1)
-            #plt.close(myfig)            
+            plt.close(myfig)            
             
             image_copy = image
             # resize so we can write some info onto image
@@ -302,7 +355,7 @@ def make_video(fdict, model, preproc=False):
                 image2 = cv2.resize(image2, (IMAGE_WIDTH, IMAGE_HEIGHT), cv2.INTER_AREA)
                 cv2.putText(image2, 'Network Image', (50, 50), font, 1, (255, 255, 255), 2, cv2.LINE_AA)
                 # histogram on network image
-                myfig = plot_img_hist(image)
+                myfig = plot_img_hist(image, 'yuv-rgb')
                 myfig.savefig("temp_plot.png")
                 image4 = cv2.imread("temp_plot.png")
                 # save
@@ -325,163 +378,40 @@ def make_video(fdict, model, preproc=False):
     cv2.destroyAllWindows()
     video.release()
 
+  
+    # subset 100 images - should be quicker
+    #path = 'C:\\Users\\aczd097\\Downloads\\dataset\\unity\\log_sample\\subset_100\\'
+    #mask = '*.jpg'
+    #fdict = sort_unity_files(path, mask)
+    #model = 'nvidia2'
+    #make_video(fdict, model, True) # saved as nvidia2.avi
 
-#if __name__ == "__main__":
-#    import argparse
-#    parser = argparse.ArgumentParser(description='Make Video script')
-#    parser.add_argument('--filename', type=str, help='tcpflow log')
-#    parser.add_argument('--model', type=str, help='model name for video label')
-#    args = parser.parse_args()
-#    make_video(args.filename, args.model, True)
+# subset 100 images - should be quicker
+#path = 'C:\\Users\\aczd097\\Downloads\\dataset\\unity\\log_sample\\subset_100\\'
+#mask = '*.jpg'
+#fdict = sort_unity_files(path, mask)
+#model = 'nvidia2'
+#make_video(fdict, model, True) # saved as nvidia2.avi   
+
+if __name__ == "__main__":
+    import argparse
+    parser = argparse.ArgumentParser(description='Make Video script')
+    parser.add_argument('--filepath', type=str, help='tcpflow log')
+    parser.add_argument('--model', type=str, help='model name for video label')
+    parser.add_argument('--mask', type=str, help='image file suffix')    
+    args = parser.parse_args()
+    #fdict = sort_unity_files(args.filepath, args.mask)
+    #make_video(fdict, model, True) # saved as nvidia2.avi 
+    #make_video(args.filepath, args.model, True)
     # example
-    # python MakeVideo.py --filename=/tmp/tcpflow.log --model=20201120184912_sanity.h5
+    # python utils.py --filepath=C:\\Users\\aczd097\\Downloads\\dataset\\unity\\log_sample\\subset_100\\ \
+    --model=nvidia2     --mask=*.jpg
+    
+  
 
 
 # In[ ]:
 
 
-# path = 'C:\\Users\\aczd097\\Downloads\\dataset\\unity\\log_sample\\subset_100\\'
-path = 'C:\\Users\\aczd097\\Downloads\\dataset\\unity\\log_sample\\subset\\'
-mask = '*.jpg'
-fdict = sort_unity_files(path, mask)
-# subset 100 images - should be quicker
-model = 'nvidia2'
-make_video(fdict, model, True) # saved as nvidia2.avi
-#for key in sorted(fdict):
-#    print(fdict[key])
 
-
-# In[107]:
-
-
-import os
-import sys
-# find the current path, might not be necessary running as a .py script
-module_path = os.path.abspath(os.path.join('..'))
-if module_path not in sys.path:
-    sys.path.append(module_path)
-
-    
-import Augment_cls as Augmentation
-ag = Augmentation.Augment_cls('nvidia2')  
-import conf
-
-path = 'C:\\Users\\aczd097\\Downloads\\dataset\\unity\\log_sample\\logs_Mon_Jul_13_08_29_01_2020\\'
-mask = '*.jpg'
-fdict = sort_unity_files(path, mask)
-len(fdict) 
-
-
-# In[152]:
-
-
-import cv2
-import matplotlib.pyplot as plt
-img = cv2.imread(fdict[100]) 
-img1 = cv2.resize(img, (800, 600), cv2.INTER_AREA)
-# plt.rcParams["figure.figsize"] = (20,3)
-plt.imshow(img1)
-
-#jsa = get_sdsandbox_json_steer_angle(fdict[100])
-#print(jsa)  
-
-
-# In[64]:
-
-
-import Augment_cls as Augmentation
-ag = Augmentation.Augment_cls('nvidia2')
-
-path = 'C:\\Users\\aczd097\\Downloads\\dataset\\unity\\log_sample\\logs_Mon_Jul_13_08_29_01_2020\\'
-mask = '*.jpg'
-fdict = sort_unity_files(path, mask)
-print(type(fdict))
-print(type(sorted(fdict)))
-#for key in sorted(fdict):
-#    print("key: {}, value:{}".format(key,fdict[key]))
-
-len(fdict) 
-
-
-# In[65]:
-
-
-import cv2
-import matplotlib.pyplot as plt
-img = cv2.imread(fdict[0]) 
-plt.imshow(img)
-
-import cv2
-s_img = cv2.imread("smaller_image.png")
-l_img = cv2.imread("larger_image.jpg")
-x_offset=y_offset=50
-l_img[y_offset:y_offset+s_img.shape[0], x_offset:x_offset+s_img.shape[1]] = s_img
-
-
-# In[66]:
-
-
-img_arr = add_rain(img, 'torrential', 20)
-plt.imshow(img_arr)
-
-
-# In[153]:
-
-
-def overlay_imgs(s_img, l_img, x_offset=50, y_offset=50):
-    """
-    
-    """
-    #import cv2
-    #s_img = cv2.imread("smaller_image.png")
-    #l_img = cv2.imread("larger_image.jpg")
-    # x_offset=y_offset=50
-    l_img[y_offset:y_offset+s_img.shape[0], x_offset:x_offset+s_img.shape[1]] = s_img
-    return l_img
-
-import numpy as np
-# img_arr = np.asarray(img_arr, dtype=np.float32)
-
-# set to same image size expected from acquisition process
-img_arr = ag.resize_expected(img_arr)
-
-# check for rain
-#if(conf.rt != ''):
-#    img_arr = add_rain(img_arr, conf.rt, conf.st)
-#    self.img_add_rain = img_arr
-
-# same preprocessing as for training
-img_arr = ag.preprocess(img_arr)
-plt.imshow(img_arr)       
-# img = ag.preprocess(img)
-
-
-# In[18]:
-
-
-# TODO, need to bring this from existing module
-def add_rain(image_arr, rt=None, st=0):
-    """
-    Add rain to image
-    Inputs:
-        image_arr: numpy array containing image
-        rt: string, rain type "heavy" or "torrential"
-        st: range to draw a random slant from
-    Output
-        image_arr: numpy array containing image with rain
-    """
-    import Automold as am
-    
-    # print("Adding rain...")
-    if(st != 0):
-        # draw a random number for slant
-        st = np.random.randint(-1 * st, st)
-
-    if(rt!='light'): # heavy or torrential
-        image_arr = am.add_rain_single(image_arr, rain_type=rt, slant=st)
-    else:
-         # no slant
-        image_arr = am.add_rain_single(image_arr)
-
-    return image_arr
 

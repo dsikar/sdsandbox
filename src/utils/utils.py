@@ -530,7 +530,7 @@ if __name__ == "__main__":
     #make_video(args.filepath, args.model, True)
     # example
     # python utils.py --filepath=C:\\Users\\aczd097\\Downloads\\dataset\\unity\\log_sample\\subset_100\\ \
-    --model=nvidia2     --mask=*.jpg
+    # --model=nvidia2     --mask=*.jpg
     
   
 

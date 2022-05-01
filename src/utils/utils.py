@@ -455,8 +455,9 @@ def plot_img_hist(img, scheme='rgb'):
     # make y scale logarithmic
     # plt.yscale('log', nonposy='clip')
     # set y limit, may need to change
-    ymax = 10000
-    plt.ylim(0, ymax)
+    # No plotting max for one off images
+    #ymax = 10000
+    #plt.ylim(0, ymax)
     plt.savefig("temp_plot.jpg")
     plt.close(fig)
     #return fig

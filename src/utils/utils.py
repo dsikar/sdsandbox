@@ -386,6 +386,131 @@ def make_video(fdict, model, preproc=False):
     #model = 'nvidia2'
     #make_video(fdict, model, True) # saved as nvidia2.avi
 
+def plot_img_hist(img, scheme='rgb'):
+    """
+    Plot histogram for an rgb array
+
+    Parameters
+    -------
+        img: numpy array
+        scheme: string, 'rgb' (default) or , 'yuv-rgb'
+        If scheme is rgb, maximum number of values in a bins is expected to 3 digit, otherwise
+        6 digits and y-axys is plotted on log scale.
+
+    Returns
+    -------
+        fig: matplotlib.pyplot figure
+
+    Example
+    -------
+    import cv2
+    import numpy as np
+    import matplotlib.pyplot as plt
+    ipath = 'C:\\Users\\aczd097\\Downloads\\dataset\\unity\\log_sample\\logs_Mon_Jul_13_08_29_01_2020\\12893_cam-image_array_.jpg'
+    img1 = cv2.imread(ipath) # 120x160x3
+    plt.rcParams["figure.figsize"] = (6,4)
+    myfig = plot_img_hist(img)
+    """
+    # from https://discuss.pytorch.org/t/plot-a-histogram-for-multiple-images-full-dataset/67600
+    # https://jakevdp.github.io/blog/2013/12/01/kernel-density-estimation/
+    from PIL import Image
+    import numpy as np
+    import matplotlib.pyplot as plt
+
+    nb_bins = 256
+    count_r = np.zeros(nb_bins)
+    count_g = np.zeros(nb_bins)
+    count_b = np.zeros(nb_bins)
+
+    # Calculate manual hist
+    x = np.array(img)
+    x = x.transpose(2, 0, 1)
+    hist_r = np.histogram(x[0], bins=nb_bins, range=[0, 255])
+    hist_g = np.histogram(x[1], bins=nb_bins, range=[0, 255])
+    hist_b = np.histogram(x[2], bins=nb_bins, range=[0, 255])
+    count_r = hist_r[0]
+    count_g = hist_g[0]
+    count_b = hist_b[0]
+
+    # Plot manual
+    bins = hist_r[1]
+    fig = plt.figure()
+    # figure()
+    #plt.yscale('log')
+    Rmean = "{:.2f}".format(np.mean(x[0]))
+    plt.bar(bins[:-1], count_r, color='r', alpha=0.5, label="red (mean = " + Rmean + ")")
+    Gmean = "{:.2f}".format(np.mean(x[1]))
+    plt.bar(bins[:-1], count_g, color='g', alpha=0.45, label="green (mean = " + Gmean + ")")
+    Bmean = "{:.2f}".format(np.mean(x[2]))
+    plt.bar(bins[:-1], count_b, color='b', alpha=0.4, label="blue (mean = " + Bmean + ")")
+    # show labels
+    plt.legend(loc='upper right')
+    plt.xlabel("Bins")
+    plt.xticks(np.arange(0, 255, step=25))
+    plt.ylabel("Pixels")
+    RGBmean = "{:.2f}".format(np.mean(x))
+    plt.title("RGB intensity value distributions (mean = " + RGBmean + ")")
+    # add a grid
+    plt.grid()
+    # make y scale logarithmic
+    # plt.yscale('log', nonposy='clip')
+    # set y limit, may need to change
+    ymax = 10000
+    plt.ylim(0, ymax)
+    plt.savefig("temp_plot.jpg")
+    plt.close(fig)
+    #return fig
+
+# change rgb values
+# https://stackoverflow.com/questions/59320564/how-to-access-and-change-color-channels-using-pil
+def changeRGB(img, rv=0, gv=0, bv=0):
+  """
+  Change RGB values using PIL
+
+  Parameters
+  -------
+  img: uint8 numpy image array
+  rv: integer, value to be added to red channel
+  gv: integer, value to be added to green channel
+  bv, integer, value to be added to blue channel
+
+  Output
+  -------
+  myimg: uint8 numpy image array
+
+  Example
+  -------
+  import matplotlib.pyplot as plt
+  import matplotlib.image as mpimg
+  img = mpimg.imread('steph.jpeg')
+  myimg = changeRGB(img, 60, 0, 0)
+  plt.imshow(myimg)
+  """
+  from PIL import Image
+  import numpy as np
+
+  im = Image.fromarray(np.uint8(img))
+
+  # Split into 3 channels
+  r, g, b = im.split()
+
+  # Red
+  r = r.point(lambda i: i + rv)
+
+  # Green
+  g = g.point(lambda i: i + gv)
+
+  # Blue
+  b = b.point(lambda i: i + bv)
+
+  # Recombine back to RGB image
+  result = Image.merge('RGB', (r, g, b))
+
+  # Convert to uint8 numpy array
+  myimg = np.asarray(result)
+
+  return myimg
+
 # subset 100 images - should be quicker
 #path = 'C:\\Users\\aczd097\\Downloads\\dataset\\unity\\log_sample\\subset_100\\'
 #mask = '*.jpg'

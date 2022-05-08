@@ -16,7 +16,7 @@ from tensorflow.python.keras.models import load_model
 # rain
 from predict_client import add_rain
 # Augmentation library
-import Augmentation
+import Augment_cls as Augmentation
 
 def load_json(filepath):
     """

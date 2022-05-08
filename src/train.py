@@ -21,9 +21,10 @@ from tensorflow import keras
 import conf
 import models
 from helper_functions import hf_mkdir, parse_bool
-from augmentation import augment, preprocess
+# from augmentation import augment, preprocess
 # import cv2
-import Augmentation
+# import Augmentation
+import Augment_cls
 
 '''
 matplotlib can be a pain to setup. So handle the case where it is absent. When present,
@@ -356,7 +357,7 @@ if __name__ == "__main__":
     conf.preproc = args.preproc
     conf.model_name = args.model
     #print(tf.__version__) 2.2.0
-    ag = Augmentation.Augmentation(args.model)
+    ag = Augment_cls.Augment_cls(args.model)
     go(args.model, args.outdir, epochs=args.epochs, limit=args.limit, inputs=args.inputs)
 
 #python train.py ..\outputs\mymodel_aug_90_x4_e200 --epochs=200

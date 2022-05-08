@@ -18,10 +18,11 @@ import tensorflow as tf
 import conf
 import models
 from helper_functions import hf_mkdir
-from augmentation import augment, preprocess
+#from augmentation import augment, preprocess
+import Augment_cls
 import cv2
 from train import load_json, get_files
-from augmentation import preprocess
+# from augmentation import preprocess
 from utils.steerlib import gos, plotSteeringAngles
 from pathlib import Path
 
@@ -36,14 +37,18 @@ from tensorflow.python.keras.models import load_model
 # 5. Generate a "goodness of steer" value (average steering error)
 # 6. Generate graph
 
-def predict_drive(datapath, modelpath, nc):
+def predict_drive(datapath, modelpath, nc, modelname='nvidia2'):
     """
-    Generate predictions from a model for a dataset
+    Generate predictions from a model for a dataset. Note, this previously relied
+    on image dimentions being set in conf.py, when using augmentation. Now we 
+    switched to using Augment_cls. To make it backwards compatible, we introduce
+    a model name variable, with a default of nvidia2, and use that geometry.
     Inputs
         datapath: string, path to data
         modelpath: string, path to trained model
         nc: steering angle normalization constant
     """
+    ag = Augment_cls.Augment_cls(modelname)
     print("loading model", modelpath)
     model = load_model(modelpath)
 
@@ -64,7 +69,7 @@ def predict_drive(datapath, modelpath, nc):
         # The image will be 1. resized to expected pre-processing size and 2.resized to expected
         # size to be presented to network. This is network architecture and dataset dependant and
         # currently managed in conf.py
-        image = preprocess(image)
+        image = ag.preprocess(image)
         image = image.reshape((1,) + image.shape)
         mod_pred = model.predict(image)
         # append prediction and ground truth to list

@@ -512,16 +512,12 @@ def changeRGB(img, rv=0, gv=0, bv=0):
 
   return myimg
 
-# see https://peps.python.org/pep-0008/ for naming convention
-def get_rgb_avgs(img, scheme='rgb'):
+def get_rgb_avgs(img):
     """
     Return individual channel and overall rgb intensity values
     Parameters
     -------
-        img: numpy array
-        scheme: string, 'rgb' (default) or , 'yuv-rgb'
-        If scheme is rgb, maximum number of values in a bins is expected to 3 digit, otherwise
-        6 digits and y-axys is plotted on log scale.
+        img: PIL image
     Returns
     -------
         rgb_avg: float, overall rgb intensity average
@@ -539,24 +535,10 @@ def get_rgb_avgs(img, scheme='rgb'):
     rgb_avg, r_avg, g_avg, b_avg = get_rgb_avgs(img)
     print("RGB avg: {:.2f}, Red avg: {:.2f}, Green avg: {:.2f}, Blue avg: {:.2f}".format(rgb_avg, r_avg, g_avg, b_avg))
     """
-    # from https://discuss.pytorch.org/t/plot-a-histogram-for-multiple-images-full-dataset/67600
-    # https://jakevdp.github.io/blog/2013/12/01/kernel-density-estimation/
-    #from PIL import Image
     import numpy as np
-    #import matplotlib.pyplot as plt
 
-    #nb_bins = 256
-    #count_r = np.zeros(nb_bins)
-    #count_g = np.zeros(nb_bins)
-    #count_b = np.zeros(nb_bins)
-
-    # Calculate manual hist
     x = np.array(img)
     x = x.transpose(2, 0, 1)
-    #Rmean = "{:.2f}".format(np.mean(x[0]))
-    #Gmean = "{:.2f}".format(np.mean(x[1]))
-    #Bmean = "{:.2f}".format(np.mean(x[2]))
-    #RGBmean = "{:.2f}".format(np.mean(x))
     Rmean = np.mean(x[0])
     Gmean = np.mean(x[1])
     Bmean = np.mean(x[2])
